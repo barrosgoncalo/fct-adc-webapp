@@ -51,14 +51,14 @@ public class CreateAccountResource {
 
         UserRequest data = request.input;
 
-        LOG.fine("Attempt to create account: " + data.username);
+        LOG.fine("Attempt to create account: " + data.getUsername());
 
         if(!data.validRegistration())
             return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
 
         try {
             Transaction txn = datastore.newTransaction();
-            Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
+            Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.getUsername());
             Entity user = txn.get(userKey);
 
             if(user != null) {
@@ -67,22 +67,22 @@ public class CreateAccountResource {
             }            
             else {
                 user = Entity.newBuilder(userKey)
-                        .set( USER_NAME, data.username )
-                        .set( USER_PWD , DigestUtils.sha512Hex(data.password) )
-                        .set( USER_EMAIL, data.email )
-                        .set( USER_PHONE, data.phone )
-                        .set( USER_ADDRESS, data.address)
-                        .set( USER_ROLE, data.role.name())
+                        .set( USER_NAME, data.getUsername() )
+                        .set( USER_PWD , DigestUtils.sha512Hex(data.getPassword()) )
+                        .set( USER_EMAIL, data.getEmail() )
+                        .set( USER_PHONE, data.getPhone() )
+                        .set( USER_ADDRESS, data.getAddress())
+                        .set( USER_ROLE, data.getRole().name())
                         .set( USER_CREATION_TIME, Timestamp.now())
                         .build();
                 txn.put(user);
                 txn.commit();
-                LOG.info("User registered " + data.username);
-                return new AppResponse<>( "success", new UserResponse(data.username, data.role) ).toResponse();
+                LOG.info("User registered " + data.getUsername());
+                return new AppResponse<>( "success", new UserResponse(data.getUsername(), data.getRole()) ).toResponse();
             }
         } catch (Exception e) {
             LOG.severe("Error registering user: " + e.getMessage());
-            return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.IE_CREATE_ACCOUNT).toResponse();
+            return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
         }
         finally {
             // No need to rollback here, as we only have one transaction and it will be automatically rolled back if not committed.

@@ -8,11 +8,11 @@ public class AuthToken {
 
 	public static final long EXPIRATION_TIME = 1000*60*15; // 9h
 	
-	public String tokenId;
-	public String username;
-    public UserRole role;
-	public long issuedAt;
-	public long expiresAt;
+	private String tokenId;
+	private String username;
+    private UserRole role;
+	private long issuedAt;
+	private long expiresAt;
 	
 	public AuthToken() { }
 	
@@ -23,6 +23,28 @@ public class AuthToken {
 		this.issuedAt = System.currentTimeMillis();
 		this.expiresAt = this.issuedAt + EXPIRATION_TIME;
 	}
+
+    // getters
+	public String getTokenId() {
+		return tokenId;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public UserRole getRole() {
+		return role;
+	}
+
+	public long getIssuedAt() {
+		return issuedAt;
+	}
+
+	public long getExpiresAt() {
+		return expiresAt;
+	}
+
     
     @JsonIgnore
     public boolean isValid() {
@@ -33,6 +55,7 @@ public class AuthToken {
             && expiresAt != 0L;
     }
 
+    // auxiliary
     private boolean nonEmptyOrBlankField(String field) {
         return field != null && !field.isBlank();
     }

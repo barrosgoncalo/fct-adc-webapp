@@ -8,12 +8,7 @@ public enum ErrorCode {
     TOKEN_EXPIRED("9904", "The operation is called with a token that is expired"),
     UNAUTHORIZED("9905", "The operation is not allowed for the user role"),
     INVALID_INPUT("9906", "The call is using input data not following the correct specification"),
-    FORBIDDEN("9907", "The operation generated a forbidden error by other reason"),
-
-    IE_CREATE_ACCOUNT("", "Error creating account."),
-    IE_LOGIN("", "Error logging in."),
-    IE_TOKEN("", "Token already exists."),
-IE_SHOWING_USERS("", "Error showing users.");
+    FORBIDDEN("9907", "The operation generated a forbidden error by other reason");
 
     private String code;
     private String message;

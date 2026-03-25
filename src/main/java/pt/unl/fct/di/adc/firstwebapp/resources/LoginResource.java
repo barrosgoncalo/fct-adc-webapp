@@ -28,13 +28,11 @@ import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 
-import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.PathElement;
-import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Transaction;
 import com.google.cloud.datastore.DatastoreOptions;
 
@@ -78,21 +76,21 @@ public class LoginResource {
 
             LoginRequest data = request.input;
 
-		LOG.fine(LOG_MESSAGE_LOGIN_ATTEMP + data.username);
+		LOG.fine(LOG_MESSAGE_LOGIN_ATTEMP + data.getUsername());
 
         if(!data.validRegistration())
             return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
 
-		Key userKey = userKeyFactory.newKey(data.username);
+		Key userKey = userKeyFactory.newKey(data.getUsername());
 		Key ctrsKey = datastore.newKeyFactory()
-				.addAncestors(PathElement.of("User", data.username))
+				.addAncestors(PathElement.of("User", data.getUsername()))
 				.setKind("UserStats")
 				.newKey("counters");
 
 		// Generate automatically a key
 		Key logKey = datastore.allocateId(
 				datastore.newKeyFactory()
-						.addAncestors(PathElement.of("User", data.username))
+						.addAncestors(PathElement.of("User", data.getUsername()))
 						.setKind("UserLog").newKey());
 
 
@@ -101,41 +99,41 @@ public class LoginResource {
 			Entity user = txn.get(userKey);
 			if (user == null) {
 				// Username does not exist
-				LOG.warning(LOG_MESSAGE_LOGIN_ATTEMP + data.username);
+				LOG.warning(LOG_MESSAGE_LOGIN_ATTEMP + data.getUsername());
 				return new ErrorResponse(Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND).toResponse();
 			}
 
 			String hashedPWD = (String) user.getString(USER_PWD);
-			if (hashedPWD.equals(DigestUtils.sha512Hex(data.password))) {
+			if (hashedPWD.equals(DigestUtils.sha512Hex(data.getPassword()))) {
 				// Login successful
                 
                 // Return token
                 UserRole role = UserRole.valueOf(user.getString(USER_ROLE));
-                AuthToken token = new AuthToken(data.username, role);
-                LOG.info(LOG_MESSAGE_LOGIN_SUCCESSFUL + data.username);
+                AuthToken token = new AuthToken(data.getUsername(), role);
+                LOG.info(LOG_MESSAGE_LOGIN_SUCCESSFUL + data.getUsername());
 
-                Key tokenKey = tokensKeyFactory.newKey(token.tokenId);
+                Key tokenKey = tokensKeyFactory.newKey(token.getTokenId());
 
                 Entity newToken = txn.get(tokenKey);
 
                 // TODO: VERIFY IF THE TOKEN BELONGS TO THE DATABSE
 
                 newToken = Entity.newBuilder(tokenKey)
-                    .set( USER_NAME, token.username )
-                    .set( USER_ROLE, token.role.name() )
-                    .set( ISSUED_AT, token.issuedAt )
-                    .set( EXPIRES_AT, token.expiresAt )
+                    .set( USER_NAME, token.getUsername() )
+                    .set( USER_ROLE, token.getRole().name() )
+                    .set( ISSUED_AT, token.getIssuedAt() )
+                    .set( EXPIRES_AT, token.getExpiresAt() )
                     .build();
 
                 // Batch operation
                 txn.put(newToken);
                 txn.commit();
-                LOG.info("Session started for user " + data.username + " with token " + token.tokenId);
+                LOG.info("Session started for user " + data.getUsername() + " with token " + token.getTokenId());
 
                 return new AppResponse<TokenWrapper>( "success", new TokenWrapper(token) ).toResponse();
 			} else {
 				// Incorrect password
-				LOG.warning(LOG_MESSAGE_WRONG_PASSWORD + data.username);
+				LOG.warning(LOG_MESSAGE_WRONG_PASSWORD + data.getUsername());
 				return new ErrorResponse(Status.FORBIDDEN, ErrorCode.INVALID_CREDENTIALS).toResponse();
 			}
 		} catch (Exception e) {

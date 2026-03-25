@@ -2,13 +2,13 @@ package pt.unl.fct.di.adc.firstwebapp.data;
 
 public class UserRequest {
 
-        public String username;
-        public String password;
-        public String confirmation;
-        public String email;
-        public String phone;
-        public String address;
-        public UserRole role;
+        private String username;
+        private String password;
+        private String confirmation;
+        private String email;
+        private String phone;
+        private String address;
+        private UserRole role;
 
         public UserRequest() {}
 
@@ -23,12 +23,42 @@ public class UserRequest {
             this.role = role;
         }
 
-        private boolean nonEmptyOrBlankField(String field) {
-            return field != null && !field.isBlank();
-        }
+        // getters
+		public String getUsername() {
+			return username;
+		}
 
 
-        // TODO: Should unknown roles lead to INVALID_INPUT??
+		public String getPassword() {
+			return password;
+		}
+
+
+		public String getConfirmation() {
+			return confirmation;
+		}
+
+
+		public String getEmail() {
+			return email;
+		}
+
+
+		public String getPhone() {
+			return phone;
+		}
+
+
+		public String getAddress() {
+			return address;
+		}
+
+
+		public UserRole getRole() {
+			return role;
+		}
+
+        // TODO: Should unknown roles lead to INVALID_INPUT?? [NEXT POINT]
         public boolean validRegistration() {
 
             return nonEmptyOrBlankField(username) &&
@@ -40,4 +70,12 @@ public class UserRequest {
                 email.contains("@") &&
                 password.equals(confirmation);
         }
+
+        // auxiliary
+        private boolean nonEmptyOrBlankField(String field) {
+            return field != null && !field.isBlank();
+        }
+
+
+
 }

@@ -5,8 +5,6 @@ import java.util.logging.Logger;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Transaction;
 
 import jakarta.ws.rs.POST;
@@ -21,8 +19,12 @@ import pt.unl.fct.di.adc.firstwebapp.data.DeleteAccountResponse;
 import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
+import pt.unl.fct.di.adc.firstwebapp.util.AuthUtils;
+import pt.unl.fct.di.adc.firstwebapp.util.UserUtils;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 
 
 @Path("/deleteaccount")
@@ -31,16 +33,10 @@ public class DeleteAccountResource {
 
 
     private final String USER_ROLE = "role";
-    private final String EXPIRES_AT = "expiresAt";
-
-	private static final String LOG_DELETE_ACCOUNT_ATTEMP = "Delete account attempt by user: ";
 
 
 	private static final Logger LOG = Logger.getLogger(CreateAccountResource.class.getName());
 	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
-
-	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
-	private static final KeyFactory tokensKeyFactory = datastore.newKeyFactory().setKind("Token");
 
 
     public DeleteAccountResource() {}
@@ -49,8 +45,6 @@ public class DeleteAccountResource {
     public Response doDeleteResource(AppRequest<DeleteAccountRequest> request) {
 
         DeleteAccountRequest data = request.input;
-
-		LOG.fine(LOG_DELETE_ACCOUNT_ATTEMP + data.getUsername());
 
         if(!data.validDelete())
             return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
@@ -61,49 +55,51 @@ public class DeleteAccountResource {
         try {
 
             // User verification
-            Key userKey = userKeyFactory.newKey(data.getUsername());
-            Entity user = txn.get(userKey);
-
-            if(user == null) {
-                LOG.warning(LOG_DELETE_ACCOUNT_ATTEMP + data.getUsername());
+            Entity user;
+            try{ user = UserUtils.validateUser(txn, data.getUsername()); }
+            catch(InvalidInputException e) {
+                // TODO : LOG
+                return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
+            }
+            catch(UserNotFoundException e) {
+                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
             // Token verification
-            Key tokenKey = tokensKeyFactory.newKey(request.token.tokenId);
-            Entity token = txn.get(tokenKey);
-
-            if(token == null) {
-                LOG.warning(LOG_DELETE_ACCOUNT_ATTEMP + request.token.tokenId);
+            Entity requester;
+            try { requester = AuthUtils.validateToken(txn, request.token.getTokenId()); }
+            catch(InvalidInputException e) {
+                // TODO: LOG
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
-
-            if(System.currentTimeMillis() > token.getLong(EXPIRES_AT)) {
-                // TODO: LOG 
-                return new ErrorResponse(Status.OK, ErrorCode.TOKEN_EXPIRED).toResponse();
+            // TODO : Dubious Error to show, if the requester doesn't exist in DB
+            catch(UserNotFoundException e) {
+                // TODO: LOG
+                return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
 
-            String roleString = user.getString(USER_ROLE);
+            // Verify authorization
+            String roleString = requester.getString(USER_ROLE);
             UserRole role;
-            
             try { role = UserRole.valueOf(roleString); }
             catch(Exception e) {
+                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
             }
 
             if(UserRole.ADMIN != role) {
                 // TODO: LOG
-                return new ErrorResponse(Status.OK, ErrorCode.TOKEN_EXPIRED).toResponse();
+                return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
 
-            txn.delete(userKey);
+            txn.delete(user.getKey());
             txn.commit();
-            LOG.info("Deleted user " + data.getUsername() + " with token " + request.token.tokenId);
+            LOG.info("Deleted user " + data.getUsername() + " with token " + request.token.getTokenId());
             DeleteAccountResponse response = new DeleteAccountResponse();
             return new AppResponse<DeleteAccountResponse>( "success",  response).toResponse();
 
         } catch (Exception e) {
-			txn.rollback();
 			LOG.severe(e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
 		} finally {

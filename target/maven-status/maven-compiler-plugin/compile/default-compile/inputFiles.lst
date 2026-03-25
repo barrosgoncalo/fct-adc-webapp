@@ -9,9 +9,14 @@
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/UserSummaryResponse.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/error/ErrorCode.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/error/ErrorResponse.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/exceptions/ExpiredTokenException.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/exceptions/InvalidInputException.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/exceptions/UserNotFoundException.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/CreateAccountResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/DeleteAccountResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/LoginResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/ShowUsersResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/util/AppRequest.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/util/AppResponse.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/util/AuthUtils.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/util/UserUtils.java

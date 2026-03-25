@@ -1,7 +1,6 @@
 package pt.unl.fct.di.adc.firstwebapp.data;
 
 
-
 public class TokenWrapper {
 
     private final AuthToken token;
@@ -10,6 +9,7 @@ public class TokenWrapper {
         this.token = token;
     }
 
+    // getters
 	public AuthToken getToken() {
 		return token;
 	}

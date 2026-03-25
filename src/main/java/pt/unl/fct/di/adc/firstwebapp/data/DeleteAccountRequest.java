@@ -10,6 +10,7 @@ public class DeleteAccountRequest {
         this.username = username;
     }
 
+    // getters
 	public String getUsername() {
 		return username;
 	}
@@ -18,6 +19,7 @@ public class DeleteAccountRequest {
         return nonEmptyOrBlankField(username);
     }
 
+    // auxiliary
     private boolean nonEmptyOrBlankField(String field) {
         return field != null && !field.isBlank();
     }

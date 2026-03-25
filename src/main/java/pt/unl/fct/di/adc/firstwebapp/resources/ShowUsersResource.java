@@ -1,7 +1,6 @@
 package pt.unl.fct.di.adc.firstwebapp.resources;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -12,7 +11,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
-import com.google.cloud.datastore.Transaction;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -58,7 +56,7 @@ public class ShowUsersResource {
 
         try {
 
-            Key tokenKey = tokensKeyFactory.newKey(token.tokenId);
+            Key tokenKey = tokensKeyFactory.newKey(token.getTokenId());
 
             Entity tokenEntity = datastore.get(tokenKey);
 
@@ -91,7 +89,7 @@ public class ShowUsersResource {
             return new AppResponse<List<UserSummaryResponse>>("success", summary).toResponse();
         } catch (Exception e) {
             LOG.severe("Error showing users: " + e.getMessage());
-            return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.IE_SHOWING_USERS).toResponse();
+            return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
         } finally {
             // TODO
         }
