@@ -10,13 +10,13 @@ public class AuthToken {
 	
 	private String tokenId;
 	private String username;
-    private UserRole role;
+    private String role;
 	private long issuedAt;
 	private long expiresAt;
 	
 	public AuthToken() { }
 	
-	public AuthToken(String username, UserRole role) {
+	public AuthToken(String username, String role) {
 		this.username = username;
 		this.tokenId = UUID.randomUUID().toString();
         this.role = role;
@@ -33,7 +33,7 @@ public class AuthToken {
 		return username;
 	}
 
-	public UserRole getRole() {
+	public String getRole() {
 		return role;
 	}
 

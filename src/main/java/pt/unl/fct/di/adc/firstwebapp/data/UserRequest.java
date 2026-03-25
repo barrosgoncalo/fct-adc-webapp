@@ -5,7 +5,6 @@ public class UserRequest {
         private String username;
         private String password;
         private String confirmation;
-        private String email;
         private String phone;
         private String address;
         private String role;
@@ -13,11 +12,10 @@ public class UserRequest {
         public UserRequest() {}
 
 
-        public UserRequest(String username, String password, String confirmation, String email, String phone, String address, String role) {
+        public UserRequest(String username, String password, String confirmation, String phone, String address, String role) {
             this.username = username;
             this.password = password;
             this.confirmation = confirmation;
-            this.email = email;
             this.phone = phone;
             this.address = address;
             this.role = role;
@@ -38,12 +36,6 @@ public class UserRequest {
 			return confirmation;
 		}
 
-
-		public String getEmail() {
-			return email;
-		}
-
-
 		public String getPhone() {
 			return phone;
 		}
@@ -63,11 +55,10 @@ public class UserRequest {
 
             return nonEmptyOrBlankField(username) &&
                 nonEmptyOrBlankField(password) &&
-                nonEmptyOrBlankField(email) &&
                 nonEmptyOrBlankField(phone) &&
                 nonEmptyOrBlankField(address) &&
                 nonEmptyOrBlankField(role) &&
-                email.contains("@") &&
+                username.contains("@") &&
                 password.equals(confirmation);
         }
 

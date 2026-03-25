@@ -80,13 +80,8 @@ public class DeleteAccountResource {
             }
 
             // Verify authorization
-            String roleString = requester.getString(USER_ROLE);
-            if(UserRole.isDefined(roleString)) {
-                // TODO : LOG
-                return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
-            }
-
-            if(UserRole.ADMIN != UserRole.valueOf(roleString)) {
+            String role = requester.getString(USER_ROLE);
+            if(UserRole.ADMIN != UserRole.valueOf(role)) {
                 // TODO: LOG
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }

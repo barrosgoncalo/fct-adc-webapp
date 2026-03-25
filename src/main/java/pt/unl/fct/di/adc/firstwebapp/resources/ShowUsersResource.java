@@ -34,7 +34,6 @@ public class ShowUsersResource {
 
     private final String EXPIRES_AT = "expiresAt";
     private final String USER_KEY_NAME = "username";
-    private final String USER_EMAIL = "email";
     private final String USER_ROLE = "role";
 
     private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
@@ -67,12 +66,13 @@ public class ShowUsersResource {
                 return new ErrorResponse(Status.FORBIDDEN, ErrorCode.TOKEN_EXPIRED).toResponse();
 
             String roleString = tokenEntity.getString(USER_ROLE);
-            if(UserRole.isDefined(roleString))
+            if(!UserRole.isDefined(roleString))
                 return new ErrorResponse(Status.FORBIDDEN, ErrorCode.INVALID_INPUT).toResponse();
             UserRole role = UserRole.valueOf(roleString);
 
             if(role != UserRole.ADMIN)
                 return new ErrorResponse(Status.UNAUTHORIZED, ErrorCode.UNAUTHORIZED).toResponse();
+
             String kind = "User";
             String gqlQuery = "select * from " + kind;
             Query<Entity> query = Query.newGqlQueryBuilder(Query.ResultType.ENTITY, gqlQuery).build();
@@ -83,7 +83,6 @@ public class ShowUsersResource {
                 String keyName = entity.getString(USER_KEY_NAME);
                 UserSummaryResponse user = new UserSummaryResponse(
                         keyName,
-                        entity.getString(USER_EMAIL),
                         entity.getString(USER_ROLE));
 
                 summary.add(user);

@@ -12,7 +12,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import com.google.gson.Gson;
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Entity;
@@ -34,7 +33,6 @@ public class CreateAccountResource {
 
     private final String USER_NAME = "username";
     private final String USER_PWD = "password";
-    private final String USER_EMAIL = "email";
     private final String USER_PHONE = "phone";
     private final String USER_ADDRESS = "address";
     private final String USER_ROLE = "role";
@@ -69,7 +67,6 @@ public class CreateAccountResource {
                 user = Entity.newBuilder(userKey)
                         .set( USER_NAME, data.getUsername() )
                         .set( USER_PWD , DigestUtils.sha512Hex(data.getPassword()) )
-                        .set( USER_EMAIL, data.getEmail() )
                         .set( USER_PHONE, data.getPhone() )
                         .set( USER_ADDRESS, data.getAddress())
                         .set( USER_ROLE, data.getRole())
@@ -78,6 +75,7 @@ public class CreateAccountResource {
                 txn.put(user);
                 txn.commit();
                 LOG.info("User registered " + data.getUsername());
+
                 return new AppResponse<>("success", new UserResponse( data.getUsername(), UserRole.valueOf(data.getRole()) )).toResponse();
             }
         } 

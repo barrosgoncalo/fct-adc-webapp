@@ -97,11 +97,9 @@ public class LoginResource {
 				// Login successful
                 
                 // Return token
-                String roleString = user.getString(USER_ROLE);
-                if(UserRole.isDefined(roleString))
-                    return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
+                String role = user.getString(USER_ROLE);
                 
-                AuthToken token = new AuthToken(data.getUsername(), UserRole.valueOf(roleString));
+                AuthToken token = new AuthToken(data.getUsername(), role);
                 LOG.info(LOG_MESSAGE_LOGIN_SUCCESSFUL + data.getUsername());
 
                 Key tokenKey = tokensKeyFactory.newKey(token.getTokenId());
@@ -111,7 +109,7 @@ public class LoginResource {
 
                 newToken = Entity.newBuilder(tokenKey)
                     .set( USER_NAME, token.getUsername() )
-                    .set( USER_ROLE, token.getRole().name() )
+                    .set( USER_ROLE, token.getRole() )
                     .set( ISSUED_AT, token.getIssuedAt() )
                     .set( EXPIRES_AT, token.getExpiresAt() )
                     .build();

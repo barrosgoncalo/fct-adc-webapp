@@ -4,24 +4,18 @@ package pt.unl.fct.di.adc.firstwebapp.data;
 public class UserSummaryResponse {
 
     private String username;
-    private String email;
     private String role;
 
     public UserSummaryResponse() {}
 
-    public UserSummaryResponse(String username, String email, String role) {
+    public UserSummaryResponse(String username, String role) {
 
         this.username = username;
-        this.email = email;
         this.role = role;
     }
 
 	public String getUsername() {
 		return username;
-	}
-
-	public String getEmail() {
-		return email;
 	}
 
 	public String getRole() {
@@ -30,10 +24,6 @@ public class UserSummaryResponse {
 
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
 	}
 
 	public void setRole(String role) {
