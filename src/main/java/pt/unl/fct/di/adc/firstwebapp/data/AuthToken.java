@@ -21,5 +21,17 @@ public class AuthToken {
 		this.creationData = System.currentTimeMillis();
 		this.expirationData = this.creationData + EXPIRATION_TIME;
 	}
-	
+    
+    public boolean isValid() {
+        return nonEmptyOrBlankField(username)
+            && nonEmptyOrBlankField(tokenID)
+            && UserRole.isDefined(role)
+            && creationData != 0L
+            && expirationData != 0L;
+    }
+
+    private boolean nonEmptyOrBlankField(String field) {
+        return field != null && !field.isBlank();
+    }
+
 }

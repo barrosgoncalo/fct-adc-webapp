@@ -1,10 +1,11 @@
 pt/unl/fct/di/adc/firstwebapp/error/ErrorCode.class
-pt/unl/fct/di/adc/firstwebapp/data/LoginData.class
+pt/unl/fct/di/adc/firstwebapp/data/LoginRequest.class
 pt/unl/fct/di/adc/firstwebapp/resources/LoginResource.class
 pt/unl/fct/di/adc/firstwebapp/data/CreateAccountResponse.class
+pt/unl/fct/di/adc/firstwebapp/util/AppRequest.class
 pt/unl/fct/di/adc/firstwebapp/data/AuthToken.class
-pt/unl/fct/di/adc/firstwebapp/data/CreateAccountRequest$RequestData.class
 pt/unl/fct/di/adc/firstwebapp/resources/CreateAccountResource.class
-pt/unl/fct/di/adc/firstwebapp/data/CreateAccountResponse$ResponseData.class
+pt/unl/fct/di/adc/firstwebapp/util/AppResponse.class
 pt/unl/fct/di/adc/firstwebapp/data/CreateAccountRequest.class
+pt/unl/fct/di/adc/firstwebapp/error/ErrorResponse.class
 pt/unl/fct/di/adc/firstwebapp/data/UserRole.class

@@ -1,20 +1,14 @@
 package pt.unl.fct.di.adc.firstwebapp.resources;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Calendar;
-import java.util.ArrayList;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -24,28 +18,22 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.servlet.http.HttpServletRequest;
 
 import pt.unl.fct.di.adc.firstwebapp.data.AuthToken;
-import pt.unl.fct.di.adc.firstwebapp.data.LoginRequest.LoginData;
 import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
 import pt.unl.fct.di.adc.firstwebapp.data.LoginRequest;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
+import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
+import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Transaction;
-import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.DatastoreOptions;
-import com.google.cloud.datastore.StructuredQuery.OrderBy;
-import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
-import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
-
-import com.google.gson.Gson;
 
 
 @Path("/login")
@@ -61,8 +49,12 @@ public class LoginResource {
 	private static final String LOG_MESSAGE_WRONG_PASSWORD = "Wrong password for: ";
 	private static final String LOG_MESSAGE_UNKNOW_USER = "Failed login attempt for username: ";
 	
-	private static final String USER_PWD = "user_pwd";
-	private static final String USER_LOGIN_TIME = "user_login_time";
+    private final String USER_NAME = "username";
+    private final String USER_PWD = "password";
+    private final String USER_ROLE = "role";
+    private final String CREATION_DATA = "cretionData";
+    private final String EXPIRATION_DATA = "expirationData";
+    private final String UNKNOWN = "unknown";
 
 	/** 
 	 * Logger Object
@@ -70,21 +62,23 @@ public class LoginResource {
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
+	private static final KeyFactory tokensKeyFactory = datastore.newKeyFactory().setKind("Token");
 
-	private final Gson g = new Gson();
-	
 	public LoginResource() {} // Nothing to be done here
 	
 	@POST
-	@Path("/")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response doLoginV2(LoginRequest input,
-			@Context HttpServletRequest request,
-			@Context HttpHeaders headers) {
-            LoginData data = input.input;
+	public Response doLogin(AppRequest<LoginRequest> request,
+			@Context HttpServletRequest httpRequest,
+			@Context HttpHeaders httpHeaders) {
+
+            LoginRequest data = request.input;
 
 		LOG.fine(LOG_MESSAGE_LOGIN_ATTEMP + data.username);
+
+        if(!data.validRegistration())
+            return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
 
 		Key userKey = userKeyFactory.newKey(data.username);
 		Key ctrsKey = datastore.newKeyFactory()
@@ -98,15 +92,14 @@ public class LoginResource {
 						.addAncestors(PathElement.of("User", data.username))
 						.setKind("UserLog").newKey());
 
+
 		Transaction txn = datastore.newTransaction();
 		try {
 			Entity user = txn.get(userKey);
 			if (user == null) {
 				// Username does not exist
 				LOG.warning(LOG_MESSAGE_LOGIN_ATTEMP + data.username);
-				return Response.status(Status.NOT_FOUND)
-						.entity(ErrorCode.USER_NOT_FOUND)
-						.build();
+				return new ErrorResponse(Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND).toResponse();
 			}
 
 			// We get the user stats from the storage
@@ -123,19 +116,26 @@ public class LoginResource {
 			String hashedPWD = (String) user.getString(USER_PWD);
 			if (hashedPWD.equals(DigestUtils.sha512Hex(data.password))) {
 				// Login successful
+                
 				// Construct the logs
-				String cityLatLong = headers.getHeaderString("X-AppEngine-CityLatLong");
+                String cityLatLong = Objects.requireNonNullElse( httpHeaders.getHeaderString("X-AppEngine-CityLatLong"), UNKNOWN );
+                String city = Objects.requireNonNullElse( httpHeaders.getHeaderString("X-AppEngine-City"), UNKNOWN );
+                String country = Objects.requireNonNullElse( httpHeaders.getHeaderString("X-AppEngine-Country"), UNKNOWN );
+                String ip = Objects.requireNonNullElse( httpRequest.getRemoteAddr(), UNKNOWN );
+                String host = Objects.requireNonNullElse( httpRequest.getRemoteHost(), UNKNOWN );
+
 				Entity log = Entity.newBuilder(logKey)
-						.set("user_login_ip", request.getRemoteAddr())
-						.set("user_login_host", request.getRemoteHost())
+						.set("user_login_ip", ip)
+						.set("user_login_host", host)
 						.set("user_login_latlon", cityLatLong != null
 								? StringValue.newBuilder(cityLatLong).setExcludeFromIndexes(true).build()
 								: StringValue.newBuilder("").setExcludeFromIndexes(true).build())
-						.set("user_login_city", headers.getHeaderString("X-AppEngine-City"))
-						.set("user_login_country", headers.getHeaderString("X-AppEngine-Country"))
+						.set("user_login_city", city)
+						.set("user_login_country", country)
 						.set("user_login_time", Timestamp.now())
 						.build();
 
+                // TODO
 				// Get the user statistics and updates it
 				// Copying information every time a user logins may not be a good solution
 				// (why?)
@@ -146,18 +146,31 @@ public class LoginResource {
 						.set("user_last_login", Timestamp.now())
 						.build();
 
-				// Batch operation
-				txn.put(log, ustats);
-				txn.commit();
+                // Return token
+                UserRole role = UserRole.valueOf(user.getString(USER_ROLE));
+                AuthToken token = new AuthToken(data.username, role);
+                LOG.info(LOG_MESSAGE_LOGIN_SUCCESSFUL + data.username);
 
-				// Return token
-                String roleString = user.getString("role");
-                UserRole role = UserRole.valueOf(roleString);
-				AuthToken token = new AuthToken(data.username, role);
-				LOG.info(LOG_MESSAGE_LOGIN_SUCCESSFUL + data.username);
-				return Response.ok( new AppResponse<AuthToken>("success", token )).build();
+                Key tokenKey = tokensKeyFactory.newKey(token.tokenID);
+
+                Entity newToken = txn.get(tokenKey);
+
+                newToken = Entity.newBuilder(tokenKey)
+                    .set( USER_NAME, token.username )
+                    .set( USER_ROLE, token.role.name() )
+                    .set( CREATION_DATA, token.creationData )
+                    .set( EXPIRATION_DATA, token.expirationData )
+                    .build();
+
+                // Batch operation
+                txn.put(log, ustats, newToken);
+                txn.commit();
+                LOG.info("Session started for user " + data.username + " with token " + token.tokenID);
+
+                return new AppResponse<AuthToken>( "success", token ).toResponse();
 			} else {
 				// Incorrect password
+                // TODO
 				// Copying here is even worse. Propose a better solution!
 				Entity ustats = Entity.newBuilder(ctrsKey)
 						.set("user_stats_logins", stats.getLong("user_stats_logins"))
@@ -170,12 +183,12 @@ public class LoginResource {
 				txn.put(ustats);
 				txn.commit();
 				LOG.warning(LOG_MESSAGE_WRONG_PASSWORD + data.username);
-				return Response.status(Status.FORBIDDEN).entity(MESSAGE_INVALID_CREDENTIALS).build();
+				return new ErrorResponse(Status.FORBIDDEN, ErrorCode.INVALID_CREDENTIALS).toResponse();
 			}
 		} catch (Exception e) {
 			txn.rollback();
 			LOG.severe(e.getMessage());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.IE_LOGIN).toResponse();
 		} finally {
 			if (txn.isActive()) {
 				txn.rollback();

@@ -1,16 +1,24 @@
 package pt.unl.fct.di.adc.firstwebapp.error;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 
-public class ErrorResponse {
+public class ErrorResponse extends AppResponse<String> {
 
-    public static Response build(Status httpStatus, ErrorCode code) {
+    @JsonIgnore
+    private final Status httpStatus;
 
-        AppResponse<String> errorBody = new AppResponse<>(code.getCode(), code.getMessage());
+    public ErrorResponse(Status httpStatus, ErrorCode code) {
+        super( code.getCode(), code.getMessage() );
+        this.httpStatus = httpStatus;
+    }
 
-        return Response.status(httpStatus).entity(errorBody).build();
+    @Override
+    public Response toResponse() {
+        return Response.status(this.httpStatus).entity(this).build();
     }
 
 }

@@ -30,23 +30,30 @@ import pt.unl.fct.di.adc.firstwebapp.data.CreateAccountResponse;
 @Path("/CreateAccount")
 public class CreateAccountResource {
 
+    private final String USER_NAME = "username";
+    private final String USER_PWD = "password";
+    private final String USER_EMAIL = "email";
+    private final String USER_PHONE = "phone";
+    private final String USER_ADDRESS = "address";
+    private final String USER_ROLE = "role";
+    private final String USER_CREATION_TIME = "creation_time";
+
 	private static final Logger LOG = Logger.getLogger(CreateAccountResource.class.getName());
 	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
 	public CreateAccountResource() {}	// Default constructor, nothing to do
 
     @POST
-    @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response CreateAccount(AppRequest<CreateAccountRequest> request) {
 
         CreateAccountRequest data = request.input;
 
-        LOG.fine("Attempt to register user: " + data.username);
+        LOG.fine("Attempt to create account: " + data.username);
 
         if(!data.validRegistration())
-            return ErrorResponse.build(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT);
+            return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
 
         try {
             Transaction txn = datastore.newTransaction();
@@ -55,26 +62,26 @@ public class CreateAccountResource {
 
             if(user != null) {
                 txn.rollback();
-                return ErrorResponse.build(Status.CONFLICT, ErrorCode.USER_ALREADY_EXISTS);
+                return new ErrorResponse(Status.CONFLICT, ErrorCode.USER_ALREADY_EXISTS).toResponse();
             }            
             else {
                 user = Entity.newBuilder(userKey)
-                        .set("user_name", data.username)
-                        .set("user_pwd", DigestUtils.sha512Hex(data.password))
-                        .set("user_email", data.email)
-                        .set("user_phone", data.phone)
-                        .set("user_address", data.address)
-                        .set("user_role", data.role.name())
-                        .set("user_creation_time", Timestamp.now())
+                        .set( USER_NAME, data.username )
+                        .set( USER_PWD , DigestUtils.sha512Hex(data.password) )
+                        .set( USER_EMAIL, data.email )
+                        .set( USER_PHONE, data.phone )
+                        .set( USER_ADDRESS, data.address)
+                        .set( USER_ROLE, data.role.name())
+                        .set( USER_CREATION_TIME, Timestamp.now())
                         .build();
                 txn.put(user);
                 txn.commit();
                 LOG.info("User registered " + data.username);
-                return Response.ok( new AppResponse<CreateAccountResponse>("success", new CreateAccountResponse(data.username, data.role) )).build();
+                return new AppResponse<>( "success", new CreateAccountResponse(data.username, data.role) ).toResponse();
             }
         } catch (Exception e) {
             LOG.severe("Error registering user: " + e.getMessage());
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error registering user.").build();
+            return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.IE_CREATE_ACCOUNT).toResponse();
         }
         finally {
             // No need to rollback here, as we only have one transaction and it will be automatically rolled back if not committed.

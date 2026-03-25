@@ -1,8 +1,11 @@
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/AuthToken.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/CreateAccountRequest.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/CreateAccountResponse.java
-/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/LoginData.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/LoginRequest.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/UserRole.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/error/ErrorCode.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/error/ErrorResponse.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/CreateAccountResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/LoginResource.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/util/AppRequest.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/util/AppResponse.java

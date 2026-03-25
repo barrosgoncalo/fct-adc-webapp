@@ -28,6 +28,7 @@ public class CreateAccountRequest {
         }
 
 
+        // TODO: Should unknown roles lead to INVALID_INPUT??
         public boolean validRegistration() {
 
             return nonEmptyOrBlankField(username) &&

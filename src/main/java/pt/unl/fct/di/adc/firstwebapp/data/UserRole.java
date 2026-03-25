@@ -6,4 +6,5 @@ public enum UserRole {
     public static boolean isDefined(UserRole role) {
         return role != null;
     }
+
 }

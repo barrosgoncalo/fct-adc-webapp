@@ -2,16 +2,12 @@ package pt.unl.fct.di.adc.firstwebapp.data;
 
 public class LoginRequest {
 
-    public LoginData input;
-
-    public static class LoginData {
-
         public String username;
         public String password;
 
-        public LoginData() { }
+        public LoginRequest() { }
 
-        public LoginData(String username, String password) {
+        public LoginRequest(String username, String password) {
             this.username = username;
             this.password = password;
         }
@@ -22,10 +18,8 @@ public class LoginRequest {
 
 
         public boolean validRegistration() {
-
             return nonEmptyOrBlankField(username) &&
                 nonEmptyOrBlankField(password);
         }
 
-    }
 }
