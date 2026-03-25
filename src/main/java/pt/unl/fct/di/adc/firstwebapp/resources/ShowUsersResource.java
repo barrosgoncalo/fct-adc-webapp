@@ -1,5 +1,8 @@
 package pt.unl.fct.di.adc.firstwebapp.resources;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.cloud.datastore.Datastore;
@@ -7,6 +10,8 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.Transaction;
 
 import jakarta.ws.rs.Consumes;
@@ -19,16 +24,19 @@ import jakarta.ws.rs.core.Response.Status;
 
 import pt.unl.fct.di.adc.firstwebapp.data.AuthToken;
 import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
+import pt.unl.fct.di.adc.firstwebapp.data.UserSummaryResponse;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
+import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 
-@Path("/")
+@Path("/showusers")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ShowUsersResource {
 
-    private final String CREATION_DATA = "cretionData";
-    private final String EXPIRATION_DATA = "expirationData";
+    private final String EXPIRES_AT = "expiresAt";
+    private final String USER_KEY_NAME = "username";
+    private final String USER_EMAIL = "email";
     private final String USER_ROLE = "role";
 
     private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
@@ -41,29 +49,52 @@ public class ShowUsersResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response doShowUsers(AppRequest<String> request) {
+    public Response doShowUsers(AppRequest<Void> request) {
 
         AuthToken token = request.token;
 
         if(token == null || !token.isValid())
             return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_TOKEN).toResponse();
 
-        Key tokenKey = tokensKeyFactory.newKey(token.tokenID);
+        try {
 
-        Entity tokenEntity = datastore.get(tokenKey);
+            Key tokenKey = tokensKeyFactory.newKey(token.tokenId);
 
-        if(tokenEntity == null)
-            return new ErrorResponse(Status.UNAUTHORIZED, ErrorCode.UNAUTHORIZED).toResponse();
-        long expiration = tokenEntity.getLong(EXPIRATION_DATA);
-        if(System.currentTimeMillis() > expiration)
-            return new ErrorResponse(Status.FORBIDDEN, ErrorCode.TOKEN_EXPIRED).toResponse();
+            Entity tokenEntity = datastore.get(tokenKey);
 
-        String roleString = tokenEntity.getString(USER_ROLE);
-        UserRole role = UserRole.valueOf(roleString);
+            if(tokenEntity == null)
+                return new ErrorResponse(Status.UNAUTHORIZED, ErrorCode.UNAUTHORIZED).toResponse();
+            long expiration = tokenEntity.getLong(EXPIRES_AT);
+            if(System.currentTimeMillis() > expiration)
+                return new ErrorResponse(Status.FORBIDDEN, ErrorCode.TOKEN_EXPIRED).toResponse();
 
-        if(role != UserRole.ADMIN)
-            return new ErrorResponse(Status.UNAUTHORIZED, ErrorCode.UNAUTHORIZED).toResponse();
+            String roleString = tokenEntity.getString(USER_ROLE);
+            UserRole role = UserRole.valueOf(roleString);
 
+            if(role != UserRole.ADMIN)
+                return new ErrorResponse(Status.UNAUTHORIZED, ErrorCode.UNAUTHORIZED).toResponse();
+            String kind = "User";
+            String gqlQuery = "select * from " + kind;
+            Query<Entity> query = Query.newGqlQueryBuilder(Query.ResultType.ENTITY, gqlQuery).build();
+            QueryResults<Entity> results = datastore.run(query);
+            List<UserSummaryResponse> summary = new ArrayList<>(); 
+            while( results.hasNext() ) {
+                Entity entity = results.next();
+                String keyName = entity.getString(USER_KEY_NAME);
+                UserSummaryResponse user = new UserSummaryResponse(
+                        keyName,
+                        entity.getString(USER_EMAIL),
+                        entity.getString(USER_ROLE));
+
+                summary.add(user);
+            }
+            return new AppResponse<List<UserSummaryResponse>>("success", summary).toResponse();
+        } catch (Exception e) {
+            LOG.severe("Error showing users: " + e.getMessage());
+            return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.IE_SHOWING_USERS).toResponse();
+        } finally {
+            // TODO
+        }
     }
 
 }

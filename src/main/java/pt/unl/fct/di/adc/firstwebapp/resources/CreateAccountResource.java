@@ -24,10 +24,11 @@ import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
-import pt.unl.fct.di.adc.firstwebapp.data.CreateAccountRequest;
-import pt.unl.fct.di.adc.firstwebapp.data.CreateAccountResponse;
+import pt.unl.fct.di.adc.firstwebapp.data.UserRequest;
+import pt.unl.fct.di.adc.firstwebapp.data.UserResponse;
 
-@Path("/CreateAccount")
+@Path("/createaccount")
+@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class CreateAccountResource {
 
     private final String USER_NAME = "username";
@@ -46,9 +47,9 @@ public class CreateAccountResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response CreateAccount(AppRequest<CreateAccountRequest> request) {
+    public Response CreateAccount(AppRequest<UserRequest> request) {
 
-        CreateAccountRequest data = request.input;
+        UserRequest data = request.input;
 
         LOG.fine("Attempt to create account: " + data.username);
 
@@ -77,7 +78,7 @@ public class CreateAccountResource {
                 txn.put(user);
                 txn.commit();
                 LOG.info("User registered " + data.username);
-                return new AppResponse<>( "success", new CreateAccountResponse(data.username, data.role) ).toResponse();
+                return new AppResponse<>( "success", new UserResponse(data.username, data.role) ).toResponse();
             }
         } catch (Exception e) {
             LOG.severe("Error registering user: " + e.getMessage());

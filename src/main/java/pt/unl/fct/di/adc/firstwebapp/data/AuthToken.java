@@ -2,32 +2,35 @@ package pt.unl.fct.di.adc.firstwebapp.data;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class AuthToken {
 
-	public static final long EXPIRATION_TIME = 1000*60*60*2; // 2h
+	public static final long EXPIRATION_TIME = 1000*60*15; // 9h
 	
+	public String tokenId;
 	public String username;
-	public String tokenID;
     public UserRole role;
-	public long creationData;
-	public long expirationData;
+	public long issuedAt;
+	public long expiresAt;
 	
 	public AuthToken() { }
 	
 	public AuthToken(String username, UserRole role) {
 		this.username = username;
-		this.tokenID = UUID.randomUUID().toString();
+		this.tokenId = UUID.randomUUID().toString();
         this.role = role;
-		this.creationData = System.currentTimeMillis();
-		this.expirationData = this.creationData + EXPIRATION_TIME;
+		this.issuedAt = System.currentTimeMillis();
+		this.expiresAt = this.issuedAt + EXPIRATION_TIME;
 	}
     
+    @JsonIgnore
     public boolean isValid() {
         return nonEmptyOrBlankField(username)
-            && nonEmptyOrBlankField(tokenID)
+            && nonEmptyOrBlankField(tokenId)
             && UserRole.isDefined(role)
-            && creationData != 0L
-            && expirationData != 0L;
+            && issuedAt != 0L
+            && expiresAt != 0L;
     }
 
     private boolean nonEmptyOrBlankField(String field) {

@@ -12,7 +12,8 @@ public enum ErrorCode {
 
     IE_CREATE_ACCOUNT("", "Error creating account."),
     IE_LOGIN("", "Error logging in."),
-    IE_TOKEN("", "Token already exists.");
+    IE_TOKEN("", "Token already exists."),
+IE_SHOWING_USERS("", "Error showing users.");
 
     private String code;
     private String message;
