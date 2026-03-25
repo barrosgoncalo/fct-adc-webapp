@@ -82,17 +82,6 @@ public class LoginResource {
             return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
 
 		Key userKey = userKeyFactory.newKey(data.getUsername());
-		Key ctrsKey = datastore.newKeyFactory()
-				.addAncestors(PathElement.of("User", data.getUsername()))
-				.setKind("UserStats")
-				.newKey("counters");
-
-		// Generate automatically a key
-		Key logKey = datastore.allocateId(
-				datastore.newKeyFactory()
-						.addAncestors(PathElement.of("User", data.getUsername()))
-						.setKind("UserLog").newKey());
-
 
 		Transaction txn = datastore.newTransaction();
 		try {
@@ -100,7 +89,7 @@ public class LoginResource {
 			if (user == null) {
 				// Username does not exist
 				LOG.warning(LOG_MESSAGE_LOGIN_ATTEMP + data.getUsername());
-				return new ErrorResponse(Status.NOT_FOUND, ErrorCode.USER_NOT_FOUND).toResponse();
+				return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
 			}
 
 			String hashedPWD = (String) user.getString(USER_PWD);
@@ -108,12 +97,14 @@ public class LoginResource {
 				// Login successful
                 
                 // Return token
-                UserRole role = UserRole.valueOf(user.getString(USER_ROLE));
-                AuthToken token = new AuthToken(data.getUsername(), role);
+                String roleString = user.getString(USER_ROLE);
+                if(UserRole.isDefined(roleString))
+                    return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
+                
+                AuthToken token = new AuthToken(data.getUsername(), UserRole.valueOf(roleString));
                 LOG.info(LOG_MESSAGE_LOGIN_SUCCESSFUL + data.getUsername());
 
                 Key tokenKey = tokensKeyFactory.newKey(token.getTokenId());
-
                 Entity newToken = txn.get(tokenKey);
 
                 // TODO: VERIFY IF THE TOKEN BELONGS TO THE DATABSE

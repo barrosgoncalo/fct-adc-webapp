@@ -26,6 +26,7 @@ import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 import pt.unl.fct.di.adc.firstwebapp.data.UserRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.UserResponse;
+import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
 
 @Path("/createaccount")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -42,7 +43,7 @@ public class CreateAccountResource {
 	private static final Logger LOG = Logger.getLogger(CreateAccountResource.class.getName());
 	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
-	public CreateAccountResource() {}	// Default constructor, nothing to do
+	public CreateAccountResource() {}
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -53,7 +54,7 @@ public class CreateAccountResource {
 
         LOG.fine("Attempt to create account: " + data.getUsername());
 
-        if(!data.validRegistration())
+        if( !data.validRegistration() || !UserRole.isDefined(data.getRole()) )
             return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
 
         try {
@@ -64,23 +65,23 @@ public class CreateAccountResource {
             if(user != null) {
                 txn.rollback();
                 return new ErrorResponse(Status.CONFLICT, ErrorCode.USER_ALREADY_EXISTS).toResponse();
-            }            
-            else {
+            } else {
                 user = Entity.newBuilder(userKey)
                         .set( USER_NAME, data.getUsername() )
                         .set( USER_PWD , DigestUtils.sha512Hex(data.getPassword()) )
                         .set( USER_EMAIL, data.getEmail() )
                         .set( USER_PHONE, data.getPhone() )
                         .set( USER_ADDRESS, data.getAddress())
-                        .set( USER_ROLE, data.getRole().name())
+                        .set( USER_ROLE, data.getRole())
                         .set( USER_CREATION_TIME, Timestamp.now())
                         .build();
                 txn.put(user);
                 txn.commit();
                 LOG.info("User registered " + data.getUsername());
-                return new AppResponse<>( "success", new UserResponse(data.getUsername(), data.getRole()) ).toResponse();
+                return new AppResponse<>("success", new UserResponse( data.getUsername(), UserRole.valueOf(data.getRole()) )).toResponse();
             }
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
             LOG.severe("Error registering user: " + e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
         }

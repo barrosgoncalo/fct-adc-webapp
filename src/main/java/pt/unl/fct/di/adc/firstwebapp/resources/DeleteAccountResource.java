@@ -81,14 +81,12 @@ public class DeleteAccountResource {
 
             // Verify authorization
             String roleString = requester.getString(USER_ROLE);
-            UserRole role;
-            try { role = UserRole.valueOf(roleString); }
-            catch(Exception e) {
+            if(UserRole.isDefined(roleString)) {
                 // TODO : LOG
-                return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
+                return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
             }
 
-            if(UserRole.ADMIN != role) {
+            if(UserRole.ADMIN != UserRole.valueOf(roleString)) {
                 // TODO: LOG
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
@@ -97,7 +95,7 @@ public class DeleteAccountResource {
             txn.commit();
             LOG.info("Deleted user " + data.getUsername() + " with token " + request.token.getTokenId());
             DeleteAccountResponse response = new DeleteAccountResponse();
-            return new AppResponse<DeleteAccountResponse>( "success",  response).toResponse();
+            return new AppResponse<DeleteAccountResponse>( "success",  response ).toResponse();
 
         } catch (Exception e) {
 			LOG.severe(e.getMessage());

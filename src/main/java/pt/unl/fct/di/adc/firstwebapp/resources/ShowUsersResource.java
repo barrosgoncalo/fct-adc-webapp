@@ -67,6 +67,8 @@ public class ShowUsersResource {
                 return new ErrorResponse(Status.FORBIDDEN, ErrorCode.TOKEN_EXPIRED).toResponse();
 
             String roleString = tokenEntity.getString(USER_ROLE);
+            if(UserRole.isDefined(roleString))
+                return new ErrorResponse(Status.FORBIDDEN, ErrorCode.INVALID_INPUT).toResponse();
             UserRole role = UserRole.valueOf(roleString);
 
             if(role != UserRole.ADMIN)
