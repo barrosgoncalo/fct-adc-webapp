@@ -16,6 +16,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import pt.unl.fct.di.adc.firstwebapp.data.DeleteAccountRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.DeleteAccountResponse;
+import pt.unl.fct.di.adc.firstwebapp.data.MessageWrapper;
 import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
@@ -32,7 +33,8 @@ import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 public class DeleteAccountResource {
 
 
-    private final String USER_ROLE = "role";
+    private static final String USER_ROLE = "role";
+    private static final String SUCCESS = "Account deleted successfully";
 
 
 	private static final Logger LOG = Logger.getLogger(CreateAccountResource.class.getName());
@@ -44,7 +46,7 @@ public class DeleteAccountResource {
     @POST
     public Response doDeleteResource(AppRequest<DeleteAccountRequest> request) {
 
-        DeleteAccountRequest data = request.input;
+        DeleteAccountRequest data = request.getInput();
 
         if(!data.validDelete())
             return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
@@ -68,7 +70,7 @@ public class DeleteAccountResource {
 
             // Token verification
             Entity requester;
-            try { requester = AuthUtils.validateToken(txn, request.token.getTokenId()); }
+            try { requester = AuthUtils.validateToken(txn, request.getToken().getTokenId()); }
             catch(InvalidInputException e) {
                 // TODO: LOG
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
@@ -88,9 +90,10 @@ public class DeleteAccountResource {
 
             txn.delete(user.getKey());
             txn.commit();
-            LOG.info("Deleted user " + data.getUsername() + " with token " + request.token.getTokenId());
-            DeleteAccountResponse response = new DeleteAccountResponse();
-            return new AppResponse<DeleteAccountResponse>( "success",  response ).toResponse();
+
+            LOG.info("Deleted user " + data.getUsername() + " with token " + request.getToken().getTokenId());
+
+            return new AppResponse<MessageWrapper>( "success",  new MessageWrapper(SUCCESS) ).toResponse();
 
         } catch (Exception e) {
 			LOG.severe(e.getMessage());

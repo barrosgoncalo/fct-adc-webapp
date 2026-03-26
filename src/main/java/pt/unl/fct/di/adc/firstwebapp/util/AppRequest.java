@@ -4,9 +4,19 @@ import pt.unl.fct.di.adc.firstwebapp.data.AuthToken;
 
 public class AppRequest<T> {
 
-    public T input;
-    public AuthToken token;
+    private T input;
+    private AuthToken token;
 
     public AppRequest() {}
+
+	public T getInput() {
+		return input;
+	}
+
+	public AuthToken getToken() {
+		return token;
+	}
+
+
 
 }

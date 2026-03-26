@@ -2,6 +2,7 @@ package pt.unl.fct.di.adc.firstwebapp.util;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
@@ -23,7 +24,14 @@ public class AuthUtils {
     private static final KeyFactory tokensKeyFactory = datastore.newKeyFactory().setKind(KIND_TOKEN);
     private static final KeyFactory usersKeyFactory = datastore.newKeyFactory().setKind(KIND_USER);
 
-    public static Entity validateToken(Transaction txn, String tokenId) 
+    // Read-only
+    public static Entity validateToken(String tokenId) 
+            throws InvalidInputException, ExpiredTokenException, UserNotFoundException {
+            return validateToken(datastore, tokenId);
+    }
+
+    // Read-Modify-Write
+    public static Entity validateToken(DatastoreReader txn, String tokenId) 
             throws InvalidInputException, ExpiredTokenException, UserNotFoundException {
 
         if(!nonEmptyOrBlankField(tokenId))

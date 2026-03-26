@@ -7,8 +7,6 @@ import java.util.logging.Logger;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 
@@ -23,23 +21,26 @@ import jakarta.ws.rs.core.Response.Status;
 import pt.unl.fct.di.adc.firstwebapp.data.AuthToken;
 import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
 import pt.unl.fct.di.adc.firstwebapp.data.UserSummaryResponse;
+import pt.unl.fct.di.adc.firstwebapp.data.UsersWrapper;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
+import pt.unl.fct.di.adc.firstwebapp.util.AuthUtils;
 
 @Path("/showusers")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ShowUsersResource {
 
-    private final String EXPIRES_AT = "expiresAt";
-    private final String USER_KEY_NAME = "username";
-    private final String USER_ROLE = "role";
+    private static final String USER_KEY_NAME = "username";
+    private static final String USER_ROLE = "role";
 
     private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
     private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
-	private static final KeyFactory tokensKeyFactory = datastore.newKeyFactory().setKind("Token");
-
+    
     public ShowUsersResource() {}
 
     // TODO: not understanding ERROR cases
@@ -48,46 +49,51 @@ public class ShowUsersResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response doShowUsers(AppRequest<Void> request) {
 
-        AuthToken token = request.token;
+        AuthToken token = request.getToken();
 
         if(token == null || !token.isValid())
-            return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_TOKEN).toResponse();
+            return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
 
         try {
 
-            Key tokenKey = tokensKeyFactory.newKey(token.getTokenId());
+            // Token Validation
+            Entity requester;
+            try { requester = AuthUtils.validateToken(token.getTokenId()); }
+            catch(InvalidInputException e) {
+                return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
+            }
+            catch(ExpiredTokenException e) {
+                return new ErrorResponse(Status.OK, ErrorCode.TOKEN_EXPIRED).toResponse();
+            }
+            catch(UserNotFoundException e) {
+                return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
+            }
 
-            Entity tokenEntity = datastore.get(tokenKey);
-
-            if(tokenEntity == null)
-                return new ErrorResponse(Status.UNAUTHORIZED, ErrorCode.UNAUTHORIZED).toResponse();
-            long expiration = tokenEntity.getLong(EXPIRES_AT);
-            if(System.currentTimeMillis() > expiration)
-                return new ErrorResponse(Status.FORBIDDEN, ErrorCode.TOKEN_EXPIRED).toResponse();
-
-            String roleString = tokenEntity.getString(USER_ROLE);
+            // Role Verification
+            String roleString = requester.getString(USER_ROLE);
             if(!UserRole.isDefined(roleString))
-                return new ErrorResponse(Status.FORBIDDEN, ErrorCode.INVALID_INPUT).toResponse();
+                return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
+
             UserRole role = UserRole.valueOf(roleString);
+            if(!UserRole.isAdminOrBofficer(role))
+                return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
-            if(role != UserRole.ADMIN)
-                return new ErrorResponse(Status.UNAUTHORIZED, ErrorCode.UNAUTHORIZED).toResponse();
-
+            // Query Users
             String kind = "User";
             String gqlQuery = "select * from " + kind;
             Query<Entity> query = Query.newGqlQueryBuilder(Query.ResultType.ENTITY, gqlQuery).build();
             QueryResults<Entity> results = datastore.run(query);
             List<UserSummaryResponse> summary = new ArrayList<>(); 
+
             while( results.hasNext() ) {
                 Entity entity = results.next();
-                String keyName = entity.getString(USER_KEY_NAME);
-                UserSummaryResponse user = new UserSummaryResponse(
-                        keyName,
-                        entity.getString(USER_ROLE));
-
-                summary.add(user);
+                String username = entity.getString(USER_KEY_NAME);
+                String userRole = entity.getString(USER_ROLE);
+                summary.add( new UserSummaryResponse(username, userRole) );
             }
-            return new AppResponse<List<UserSummaryResponse>>("success", summary).toResponse();
+
+            return new AppResponse <UsersWrapper>("success", new UsersWrapper( summary )).toResponse();
+
         } catch (Exception e) {
             LOG.severe("Error showing users: " + e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();

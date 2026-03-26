@@ -2,11 +2,14 @@
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/DeleteAccountRequest.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/DeleteAccountResponse.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/LoginRequest.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/MessageWrapper.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/ModifyUserRequest.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/TokenWrapper.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/UserRequest.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/UserResponse.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/UserRole.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/UserSummaryResponse.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/data/UsersWrapper.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/error/ErrorCode.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/error/ErrorResponse.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/exceptions/ExpiredTokenException.java
@@ -15,6 +18,7 @@
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/CreateAccountResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/DeleteAccountResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/LoginResource.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/ModifyUserResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/ShowUsersResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/util/AppRequest.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/util/AppResponse.java

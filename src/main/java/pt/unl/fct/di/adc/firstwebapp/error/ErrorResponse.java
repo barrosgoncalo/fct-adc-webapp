@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 
 public class ErrorResponse extends AppResponse<String> {

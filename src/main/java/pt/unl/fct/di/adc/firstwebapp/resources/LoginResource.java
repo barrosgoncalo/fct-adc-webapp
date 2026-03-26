@@ -74,7 +74,7 @@ public class LoginResource {
 			@Context HttpServletRequest httpRequest,
 			@Context HttpHeaders httpHeaders) {
 
-            LoginRequest data = request.input;
+            LoginRequest data = request.getInput();
 
 		LOG.fine(LOG_MESSAGE_LOGIN_ATTEMP + data.getUsername());
 

@@ -31,12 +31,12 @@ import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class CreateAccountResource {
 
-    private final String USER_NAME = "username";
-    private final String USER_PWD = "password";
-    private final String USER_PHONE = "phone";
-    private final String USER_ADDRESS = "address";
-    private final String USER_ROLE = "role";
-    private final String USER_CREATION_TIME = "creation_time";
+    private static final String USER_NAME = "username";
+    private static final String USER_PWD = "password";
+    private static final String USER_PHONE = "phone";
+    private static final String USER_ADDRESS = "address";
+    private static final String USER_ROLE = "role";
+    private static final String USER_CREATION_TIME = "creation_time";
 
 	private static final Logger LOG = Logger.getLogger(CreateAccountResource.class.getName());
 	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
@@ -48,7 +48,7 @@ public class CreateAccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response CreateAccount(AppRequest<UserRequest> request) {
 
-        UserRequest data = request.input;
+        UserRequest data = request.getInput();
 
         LOG.fine("Attempt to create account: " + data.getUsername());
 
