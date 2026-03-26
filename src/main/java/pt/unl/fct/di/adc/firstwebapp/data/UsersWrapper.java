@@ -4,14 +4,14 @@ import java.util.List;
 
 public class UsersWrapper {
 
-    private final List<UserSummaryResponse> users;
+    private final List<UserSummary> users;
 
-    public UsersWrapper(List<UserSummaryResponse> users) {
+    public UsersWrapper(List<UserSummary> users) {
         this.users = users;
     }
 
     // getters
-	public List<UserSummaryResponse> getUsers() {
+	public List<UserSummary> getUsers() {
 		return users;
 	}
 }

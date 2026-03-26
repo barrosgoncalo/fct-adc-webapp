@@ -1,14 +1,13 @@
 package pt.unl.fct.di.adc.firstwebapp.data;
 
-
-public class UserSummaryResponse {
+public class UserSummary {
 
     private String username;
     private String role;
 
-    public UserSummaryResponse() {}
+    public UserSummary() {}
 
-    public UserSummaryResponse(String username, String role) {
+    public UserSummary(String username, String role) {
 
         this.username = username;
         this.role = role;
