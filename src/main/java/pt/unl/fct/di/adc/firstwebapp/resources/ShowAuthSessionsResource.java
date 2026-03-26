@@ -12,6 +12,7 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
@@ -43,6 +44,7 @@ public class ShowAuthSessionsResource {
 
     public ShowAuthSessionsResource() {}
 
+    @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response doShowAuthSessionsResource(AppRequest<Void> request)
@@ -66,13 +68,14 @@ public class ShowAuthSessionsResource {
             catch(UserNotFoundException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
+            
 
             // Role Validation
             UserRole role = UserRole.valueOf(requester.getString(USER_ROLE));
-            if(role == UserRole.ADMIN)
+            if(role != UserRole.ADMIN)
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
-            // Query Users
+            // Query Tokens
             String kind = KIND_TOKEN;
             String gqlQuery = "select * from " + kind;
             Query<Entity> query = Query.newGqlQueryBuilder(Query.ResultType.ENTITY, gqlQuery).build();
@@ -84,17 +87,15 @@ public class ShowAuthSessionsResource {
                 String tokenId = entity.getString(TOKEN_ID);
                 String username = entity.getString(USER_NAME);
                 String roleString = entity.getString(USER_ROLE);
-                String expiresAt = entity.getString(EXPIRES_AT);
-                summary.add( new TokenSummary(tokenId, username, roleString, Timestamp.parseTimestamp(expiresAt)) );
+                long expiresAt = entity.getLong(EXPIRES_AT) / 1000;
+                summary.add( new TokenSummary(tokenId, username, roleString, expiresAt) );
             }
 
             return new AppResponse <SessionsWrapper>("success", new SessionsWrapper( summary )).toResponse();
 
         } catch (Exception e) {
-            LOG.severe("Error showing users: " + e.getMessage());
+            LOG.severe("Error showing sessions: " + e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
-        } finally {
-            // TODO
         }
 
     }

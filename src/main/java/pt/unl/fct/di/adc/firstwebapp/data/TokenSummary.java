@@ -7,11 +7,11 @@ public class TokenSummary {
     private String tokenId;
     private String username;
     private String role;
-    private Timestamp expiresAt;
+    private long expiresAt;
 
     public TokenSummary() {}
 
-    public TokenSummary(String tokenId, String username, String role, Timestamp expiresAt) {
+    public TokenSummary(String tokenId, String username, String role, long expiresAt) {
         this.tokenId = tokenId;
         this.username = username;
         this.role = role;
@@ -30,7 +30,7 @@ public class TokenSummary {
 		return role;
 	}
 
-	public Timestamp getExpiresAt() {
+	public long getExpiresAt() {
 		return expiresAt;
 	}
 

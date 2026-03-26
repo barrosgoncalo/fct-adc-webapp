@@ -50,6 +50,9 @@ public class LoginResource {
 	private static final String LOG_MESSAGE_WRONG_PASSWORD = "Wrong password for: ";
 	private static final String LOG_MESSAGE_UNKNOW_USER = "Failed login attempt for username: ";
 	
+    private final String KIND_TOKEN = "Token";
+    private final String KIND_USER = "User";
+    private final String TOKEN_ID = "tokenId";
     private final String USER_NAME = "username";
     private final String USER_PWD = "password";
     private final String USER_ROLE = "role";
@@ -78,7 +81,7 @@ public class LoginResource {
 
 		LOG.fine(LOG_MESSAGE_LOGIN_ATTEMP + data.getUsername());
 
-        if(!data.validRegistration())
+        if(!data.isValid())
             return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
 
 		Key userKey = userKeyFactory.newKey(data.getUsername());
@@ -108,6 +111,7 @@ public class LoginResource {
                 // TODO: VERIFY IF THE TOKEN BELONGS TO THE DATABSE
 
                 newToken = Entity.newBuilder(tokenKey)
+                    .set( TOKEN_ID, token.getTokenId() )
                     .set( USER_NAME, token.getUsername() )
                     .set( USER_ROLE, token.getRole() )
                     .set( ISSUED_AT, token.getIssuedAt() )

@@ -51,8 +51,7 @@ public class UserRequest {
 		}
 
         // TODO: Should unknown roles lead to INVALID_INPUT?? [NEXT POINT]
-        public boolean validRegistration() {
-
+        public boolean isValid() {
             return nonEmptyOrBlankField(username) &&
                 nonEmptyOrBlankField(password) &&
                 nonEmptyOrBlankField(phone) &&

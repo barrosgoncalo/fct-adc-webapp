@@ -52,7 +52,7 @@ public class CreateAccountResource {
 
         LOG.fine("Attempt to create account: " + data.getUsername());
 
-        if( !data.validRegistration() || !UserRole.isDefined(data.getRole()) )
+        if( !data.isValid() || !UserRole.isDefined(data.getRole()) )
             return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
 
         try {

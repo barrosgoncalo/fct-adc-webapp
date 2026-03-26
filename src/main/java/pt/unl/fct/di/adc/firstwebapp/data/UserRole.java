@@ -11,8 +11,11 @@ public enum UserRole {
         return false;
     }
 
+    public static boolean isAdmin(UserRole role) {
+        return role == ADMIN;
+    }
     public static boolean isAdminOrBofficer(UserRole role) {
-       return role == UserRole.ADMIN ||  role == UserRole.BOFFICER;
+       return role == ADMIN ||  role == BOFFICER;
     }
 
 }

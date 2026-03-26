@@ -22,7 +22,7 @@ public class LoginRequest {
 		}
         
 
-        public boolean validRegistration() {
+        public boolean isValid() {
             return nonEmptyOrBlankField(username) &&
                 nonEmptyOrBlankField(password);
         }

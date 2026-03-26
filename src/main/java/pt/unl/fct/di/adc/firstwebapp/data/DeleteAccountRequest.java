@@ -15,7 +15,7 @@ public class DeleteAccountRequest {
 		return username;
 	}
 
-    public boolean validDelete() {
+    public boolean isValid() {
         return nonEmptyOrBlankField(username);
     }
 

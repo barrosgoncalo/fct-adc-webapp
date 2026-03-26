@@ -20,6 +20,7 @@ import jakarta.ws.rs.core.Response.Status;
 import pt.unl.fct.di.adc.firstwebapp.data.MessageWrapper;
 import pt.unl.fct.di.adc.firstwebapp.data.ModifyUserRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.ModifyUserRequest.AttributesData;
+import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
@@ -35,8 +36,10 @@ import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 public class ModifyAccountResource {
 
     // constants
+    private static final String USER_NAME = "name";
     private static final String USER_PHONE = "phone";
     private static final String USER_ADDRESS = "address";
+    private static final String USER_ROLE = "role";
 
     private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
     private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
@@ -71,6 +74,13 @@ public class ModifyAccountResource {
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
 
+            // Role Validation
+            String roleString = requester.getString(USER_ROLE);
+            if(!UserRole.isDefined(roleString))
+                return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
+
+            UserRole role = UserRole.valueOf(roleString);
+
             // User Validation
             String username = data.getUsername();
             Entity user;
@@ -81,6 +91,10 @@ public class ModifyAccountResource {
             catch(UserNotFoundException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
+
+            // Role permissions enforce
+            if( !(UserRole.isAdmin(role) || username == requester.getString(USER_NAME)) )
+                return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             AttributesData attributes = data.getAttributes();
 

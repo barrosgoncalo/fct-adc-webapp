@@ -14,8 +14,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import pt.unl.fct.di.adc.firstwebapp.data.DeleteAccountRequest;
-import pt.unl.fct.di.adc.firstwebapp.data.DeleteAccountResponse;
+import pt.unl.fct.di.adc.firstwebapp.data.ChangeAccountRoleRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.MessageWrapper;
 import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
@@ -44,11 +43,11 @@ public class DeleteAccountResource {
     public DeleteAccountResource() {}
 
     @POST
-    public Response doDeleteResource(AppRequest<DeleteAccountRequest> request) {
+    public Response doDeleteResource(AppRequest<ChangeAccountRoleRequest> request) {
 
-        DeleteAccountRequest data = request.getInput();
+        ChangeAccountRoleRequest data = request.getInput();
 
-        if(!data.validDelete())
+        if(!data.isValid())
             return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
 
 

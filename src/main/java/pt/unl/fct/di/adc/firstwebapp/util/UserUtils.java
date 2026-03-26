@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
@@ -21,7 +22,12 @@ public class UserUtils {
 
     private static final KeyFactory usersKeyFactory = datastore.newKeyFactory().setKind(KIND_USER);
 
-    public static Entity validateUser(Transaction txn, String username) 
+    public static Entity validateUser(String username)
+            throws InvalidInputException, ExpiredTokenException, UserNotFoundException {
+        return validateUser(datastore, username);
+    }
+
+    public static Entity validateUser(DatastoreReader txn, String username) 
             throws InvalidInputException, ExpiredTokenException, UserNotFoundException {
 
         if(!nonEmptyOrBlankField(username))

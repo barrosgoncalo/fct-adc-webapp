@@ -70,7 +70,7 @@ public class ShowUsersResource {
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
 
-            // Role Verification
+            // Role Validation
             String roleString = requester.getString(USER_ROLE);
             if(!UserRole.isDefined(roleString))
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
