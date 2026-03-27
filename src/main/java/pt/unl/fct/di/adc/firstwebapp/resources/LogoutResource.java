@@ -105,7 +105,8 @@ public class LogoutResource {
 
             results.forEachRemaining(keysToRemove::add);
 
-            txn.delete( keysToRemove.toArray(new Key[0]) );
+            if(!keysToRemove.isEmpty())
+                txn.delete( keysToRemove.toArray(new Key[0]) );
 
             txn.commit();
 
