@@ -94,6 +94,9 @@ public class ModifyAccountResource {
 
             AttributesData attributes = data.getAttributes();
 
+            if(attributes.getUsername() != null)
+                return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
+
             Entity modUser = Entity.newBuilder(user)
                     .set(Constants.USER_PHONE, attributes.getPhone())
                     .set(Constants.USER_ADDRESS, attributes.getAddress())

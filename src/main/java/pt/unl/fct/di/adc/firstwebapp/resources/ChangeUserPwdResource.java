@@ -82,6 +82,7 @@ public class ChangeUserPwdResource {
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
+            // Role verification (Token role == User role)
             if( !requester.getString(Constants.USER_NAME).equals(data.getUsername()) ) {
                 // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
