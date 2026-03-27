@@ -20,7 +20,8 @@ import jakarta.ws.rs.core.Response.Status;
 import pt.unl.fct.di.adc.firstwebapp.data.MessageWrapper;
 import pt.unl.fct.di.adc.firstwebapp.data.ModifyUserRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.ModifyUserRequest.AttributesData;
-import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
+import pt.unl.fct.di.adc.firstwebapp.data.Role;
+import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
@@ -35,12 +36,6 @@ import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ModifyAccountResource {
 
-    // constants
-    private static final String USER_NAME = "name";
-    private static final String USER_PHONE = "phone";
-    private static final String USER_ADDRESS = "address";
-    private static final String USER_ROLE = "role";
-
     private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
     private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
@@ -49,7 +44,7 @@ public class ModifyAccountResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response doModifyAccountResource(AppRequest<ModifyUserRequest> request) {
+    public Response doModifyAccount(AppRequest<ModifyUserRequest> request) {
 
         ModifyUserRequest data = request.getInput();
 
@@ -75,11 +70,11 @@ public class ModifyAccountResource {
             }
 
             // Role Validation
-            String roleString = requester.getString(USER_ROLE);
-            if(!UserRole.isDefined(roleString))
+            String roleString = requester.getString(UserConstants.USER_ROLE);
+            if(!Role.isDefined(roleString))
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
-            UserRole role = UserRole.valueOf(roleString);
+            Role role = Role.valueOf(roleString);
 
             // User Validation
             String username = data.getUsername();
@@ -93,14 +88,14 @@ public class ModifyAccountResource {
             }
 
             // Role permissions enforce
-            if( !(UserRole.isAdmin(role) || username == requester.getString(USER_NAME)) )
+            if( !(Role.isAdmin(role) || username == requester.getString(UserConstants.USER_NAME)) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             AttributesData attributes = data.getAttributes();
 
             Entity modUser = Entity.newBuilder(user)
-                    .set(USER_PHONE, attributes.getPhone())
-                    .set(USER_ADDRESS, attributes.getAddress())
+                    .set(UserConstants.USER_PHONE, attributes.getPhone())
+                    .set(UserConstants.USER_ADDRESS, attributes.getAddress())
                     .build();
 
             txn.put(modUser);

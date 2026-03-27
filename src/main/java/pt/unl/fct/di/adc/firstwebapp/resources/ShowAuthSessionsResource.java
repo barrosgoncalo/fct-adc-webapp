@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
@@ -21,7 +20,8 @@ import jakarta.ws.rs.core.Response.Status;
 
 import pt.unl.fct.di.adc.firstwebapp.data.AuthToken;
 import pt.unl.fct.di.adc.firstwebapp.data.TokenSummary;
-import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
+import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
+import pt.unl.fct.di.adc.firstwebapp.data.Role;
 import pt.unl.fct.di.adc.firstwebapp.data.SessionsWrapper;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
@@ -36,18 +36,12 @@ import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ShowAuthSessionsResource {
 
-    private static final String KIND_TOKEN = "Token";
-    private static final String TOKEN_ID = "tokenId";
-    private static final String USER_NAME = "username";
-    private static final String USER_ROLE = "role";
-    private static final String EXPIRES_AT = "expiresAt";
-
     public ShowAuthSessionsResource() {}
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response doShowAuthSessionsResource(AppRequest<Void> request)
+    public Response doShowAuthSessions(AppRequest<Void> request)
         throws InvalidInputException, ExpiredTokenException, UserNotFoundException {
 
         Logger LOG = Logger.getLogger(ShowAuthSessionsResource.class.getName());
@@ -71,12 +65,12 @@ public class ShowAuthSessionsResource {
             
 
             // Role Validation
-            UserRole role = UserRole.valueOf(requester.getString(USER_ROLE));
-            if(role != UserRole.ADMIN)
+            Role role = Role.valueOf(requester.getString(UserConstants.USER_ROLE));
+            if(role != Role.ADMIN)
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             // Query Tokens
-            String kind = KIND_TOKEN;
+            String kind = UserConstants.KIND_TOKEN;
             String gqlQuery = "select * from " + kind;
             Query<Entity> query = Query.newGqlQueryBuilder(Query.ResultType.ENTITY, gqlQuery).build();
             QueryResults<Entity> results = datastore.run(query);
@@ -84,10 +78,10 @@ public class ShowAuthSessionsResource {
             List<TokenSummary> summary = new ArrayList<>(); 
             while( results.hasNext() ) {
                 Entity entity = results.next();
-                String tokenId = entity.getString(TOKEN_ID);
-                String username = entity.getString(USER_NAME);
-                String roleString = entity.getString(USER_ROLE);
-                long expiresAt = entity.getLong(EXPIRES_AT) / 1000;
+                String tokenId = entity.getString(UserConstants.TOKEN_ID);
+                String username = entity.getString(UserConstants.USER_NAME);
+                String roleString = entity.getString(UserConstants.USER_ROLE);
+                long expiresAt = entity.getLong(UserConstants.EXPIRES_AT) / 1000;
                 summary.add( new TokenSummary(tokenId, username, roleString, expiresAt) );
             }
 

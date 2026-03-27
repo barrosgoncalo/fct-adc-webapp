@@ -3,11 +3,11 @@ package pt.unl.fct.di.adc.firstwebapp.data;
 public class UserResponse {
 
     private String username;
-    private UserRole role;
+    private Role role;
 
     public UserResponse() {}
 
-    public UserResponse(String username, UserRole role) {
+    public UserResponse(String username, Role role) {
         this.username = username;
         this.role = role;
     }
@@ -17,7 +17,7 @@ public class UserResponse {
 		return username;
 	}
 
-	public UserRole getRole() {
+	public Role getRole() {
 		return role;
 	}
 

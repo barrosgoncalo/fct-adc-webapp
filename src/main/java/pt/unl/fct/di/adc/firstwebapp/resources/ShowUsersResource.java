@@ -19,25 +19,24 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import pt.unl.fct.di.adc.firstwebapp.data.AuthToken;
-import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
+import pt.unl.fct.di.adc.firstwebapp.data.Role;
+import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
 import pt.unl.fct.di.adc.firstwebapp.data.UserSummary;
 import pt.unl.fct.di.adc.firstwebapp.data.UsersWrapper;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
-import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
-import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
-import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 import pt.unl.fct.di.adc.firstwebapp.util.AuthUtils;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 
 @Path("/showusers")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ShowUsersResource {
 
     private static final String KIND_USER = "User";
-    private static final String USER_KEY_NAME = "username";
-    private static final String USER_ROLE = "role";
 
     private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
     private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
@@ -71,12 +70,12 @@ public class ShowUsersResource {
             }
 
             // Role Validation
-            String roleString = requester.getString(USER_ROLE);
-            if(!UserRole.isDefined(roleString))
+            String roleString = requester.getString(UserConstants.USER_ROLE);
+            if(!Role.isDefined(roleString))
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
-            UserRole role = UserRole.valueOf(roleString);
-            if(!UserRole.isAdminOrBofficer(role))
+            Role role = Role.valueOf(roleString);
+            if(!Role.isAdminOrBofficer(role))
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             // Query Users
@@ -84,12 +83,12 @@ public class ShowUsersResource {
             String gqlQuery = "select * from " + kind;
             Query<Entity> query = Query.newGqlQueryBuilder(Query.ResultType.ENTITY, gqlQuery).build();
             QueryResults<Entity> results = datastore.run(query);
-            List<UserSummary> summary = new ArrayList<>(); 
 
+            List<UserSummary> summary = new ArrayList<>(); 
             while( results.hasNext() ) {
                 Entity entity = results.next();
-                String username = entity.getString(USER_KEY_NAME);
-                String userRole = entity.getString(USER_ROLE);
+                String username = entity.getString(UserConstants.USER_NAME);
+                String userRole = entity.getString(UserConstants.USER_ROLE);
                 summary.add( new UserSummary(username, userRole) );
             }
 

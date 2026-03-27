@@ -8,7 +8,6 @@ public class UserSummary {
     public UserSummary() {}
 
     public UserSummary(String username, String role) {
-
         this.username = username;
         this.role = role;
     }
@@ -21,11 +20,4 @@ public class UserSummary {
 		return role;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public void setRole(String role) {
-		this.role = role;
-	}
 }

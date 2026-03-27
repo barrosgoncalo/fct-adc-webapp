@@ -17,6 +17,4 @@ public class AppRequest<T> {
 		return token;
 	}
 
-
-
 }

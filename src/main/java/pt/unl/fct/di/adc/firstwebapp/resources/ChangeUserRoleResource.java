@@ -14,9 +14,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import pt.unl.fct.di.adc.firstwebapp.data.ChangeAccountRoleRequest;
+import pt.unl.fct.di.adc.firstwebapp.data.ChangeUserRoleRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.MessageWrapper;
-import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
+import pt.unl.fct.di.adc.firstwebapp.data.Role;
+import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
@@ -31,7 +32,6 @@ import pt.unl.fct.di.adc.firstwebapp.util.UserUtils;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ChangeUserRoleResource {
 
-    private static final String USER_ROLE = "role";
     private static final String SUCCESS = "Role updated successfully";
 
     Logger LOG = Logger.getLogger(ChangeUserRoleResource.class.getName());
@@ -42,9 +42,9 @@ public class ChangeUserRoleResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response doChangeUserRoleResource(AppRequest<ChangeAccountRoleRequest> request) {
+    public Response doChangeUserRole(AppRequest<ChangeUserRoleRequest> request) {
 
-        ChangeAccountRoleRequest data = request.getInput();
+        ChangeUserRoleRequest data = request.getInput();
 
         if(!data.isValid())
             return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
@@ -67,8 +67,8 @@ public class ChangeUserRoleResource {
             }
 
             // Role Validation
-            UserRole role = UserRole.valueOf(requester.getString(USER_ROLE));
-            if( !UserRole.isAdmin(role) )
+            Role role = Role.valueOf(requester.getString(UserConstants.USER_ROLE));
+            if( !Role.isAdmin(role) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             Entity user;
@@ -83,7 +83,7 @@ public class ChangeUserRoleResource {
             }
 
             Entity modUser = Entity.newBuilder(user)
-                    .set(USER_ROLE, data.getNewRole())
+                    .set(UserConstants.USER_ROLE, data.getNewRole())
                     .build();
                     
             txn.put(modUser);

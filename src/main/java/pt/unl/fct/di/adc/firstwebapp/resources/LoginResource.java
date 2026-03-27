@@ -1,5 +1,6 @@
 package pt.unl.fct.di.adc.firstwebapp.resources;
 
+import java.security.MessageDigest;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -18,10 +19,10 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.servlet.http.HttpServletRequest;
 
 import pt.unl.fct.di.adc.firstwebapp.data.AuthToken;
-import pt.unl.fct.di.adc.firstwebapp.data.UserRole;
+import pt.unl.fct.di.adc.firstwebapp.data.Role;
 import pt.unl.fct.di.adc.firstwebapp.data.LoginRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.TokenWrapper;
-
+import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 
@@ -50,16 +51,6 @@ public class LoginResource {
 	private static final String LOG_MESSAGE_WRONG_PASSWORD = "Wrong password for: ";
 	private static final String LOG_MESSAGE_UNKNOW_USER = "Failed login attempt for username: ";
 	
-    private final String KIND_TOKEN = "Token";
-    private final String KIND_USER = "User";
-    private final String TOKEN_ID = "tokenId";
-    private final String USER_NAME = "username";
-    private final String USER_PWD = "password";
-    private final String USER_ROLE = "role";
-    private final String ISSUED_AT = "issuedAt";
-    private final String EXPIRES_AT = "expiresAt";
-    private final String UNKNOWN = "unknown";
-
 	/** 
 	 * Logger Object
 	 */
@@ -95,12 +86,12 @@ public class LoginResource {
 				return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
 			}
 
-			String hashedPWD = (String) user.getString(USER_PWD);
-			if (hashedPWD.equals(DigestUtils.sha512Hex(data.getPassword()))) {
+			String hashedPWD = (String) user.getString(UserConstants.USER_PWD);
+			if ( MessageDigest.isEqual( hashedPWD.getBytes(), (DigestUtils.sha512Hex(data.getPassword())).getBytes() )) {
 				// Login successful
                 
                 // Return token
-                String role = user.getString(USER_ROLE);
+                String role = user.getString(UserConstants.USER_ROLE);
                 
                 AuthToken token = new AuthToken(data.getUsername(), role);
                 LOG.info(LOG_MESSAGE_LOGIN_SUCCESSFUL + data.getUsername());
@@ -111,11 +102,11 @@ public class LoginResource {
                 // TODO: VERIFY IF THE TOKEN BELONGS TO THE DATABSE
 
                 newToken = Entity.newBuilder(tokenKey)
-                    .set( TOKEN_ID, token.getTokenId() )
-                    .set( USER_NAME, token.getUsername() )
-                    .set( USER_ROLE, token.getRole() )
-                    .set( ISSUED_AT, token.getIssuedAt() )
-                    .set( EXPIRES_AT, token.getExpiresAt() )
+                    .set( UserConstants.TOKEN_ID, token.getTokenId() )
+                    .set( UserConstants.USER_NAME, token.getUsername() )
+                    .set( UserConstants.USER_ROLE, token.getRole() )
+                    .set( UserConstants.ISSUED_AT, token.getIssuedAt() )
+                    .set( UserConstants.EXPIRES_AT, token.getExpiresAt() )
                     .build();
 
                 // Batch operation

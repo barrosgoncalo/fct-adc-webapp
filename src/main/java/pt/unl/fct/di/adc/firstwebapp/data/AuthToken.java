@@ -50,7 +50,7 @@ public class AuthToken {
     public boolean isValid() {
         return nonEmptyOrBlankField(username)
             && nonEmptyOrBlankField(tokenId)
-            && UserRole.isDefined(role)
+            && Role.isDefined(role)
             && issuedAt != 0L
             && expiresAt != 0L;
     }
