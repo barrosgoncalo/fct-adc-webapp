@@ -2,7 +2,12 @@ package pt.unl.fct.di.adc.firstwebapp.data;
 
 import java.util.UUID;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import pt.unl.fct.di.adc.firstwebapp.util.AuthUtils;
+import pt.unl.fct.di.adc.firstwebapp.util.ValidationUtils;
 
 public class AuthToken {
 
@@ -13,51 +18,60 @@ public class AuthToken {
     private String role;
 	private long issuedAt;
 	private long expiresAt;
+    private String hash;
 	
 	public AuthToken() { }
 	
-	public AuthToken(String username, String role) {
+	public AuthToken(String username, String role, String masterKey) {
 		this.username = username;
 		this.tokenId = UUID.randomUUID().toString();
         this.role = role;
 		this.issuedAt = System.currentTimeMillis();
 		this.expiresAt = this.issuedAt + EXPIRATION_TIME;
-	}
+
+        this.hash = 
+            DigestUtils.sha512Hex(
+                    username 
+                    + role 
+                    + issuedAt
+                    + expiresAt
+                    + AuthUtils.computeSessionKey(masterKey, tokenId)
+                );
+}
 
     // getters
 	public String getTokenId() {
-		return tokenId;
+		return this.tokenId;
 	}
 
 	public String getUsername() {
-		return username;
+		return this.username;
 	}
 
 	public String getRole() {
-		return role;
+		return this.role;
 	}
 
 	public long getIssuedAt() {
-		return issuedAt;
+		return this.issuedAt;
 	}
 
 	public long getExpiresAt() {
-		return expiresAt;
+		return this.expiresAt;
 	}
+
+    public String getHash() {
+        return this.hash;
+    }
 
     
     @JsonIgnore
     public boolean isValid() {
-        return nonEmptyOrBlankField(username)
-            && nonEmptyOrBlankField(tokenId)
+        return ValidationUtils.nonEmptyOrBlankField(username)
+            && ValidationUtils.nonEmptyOrBlankField(tokenId)
             && Role.isDefined(role)
             && issuedAt != 0L
             && expiresAt != 0L;
-    }
-
-    // auxiliary
-    private boolean nonEmptyOrBlankField(String field) {
-        return field != null && !field.isBlank();
     }
 
 }

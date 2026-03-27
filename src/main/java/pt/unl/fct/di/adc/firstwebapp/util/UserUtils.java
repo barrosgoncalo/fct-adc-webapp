@@ -8,9 +8,7 @@ import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.Transaction;
 
-import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 
@@ -23,14 +21,14 @@ public class UserUtils {
     private static final KeyFactory usersKeyFactory = datastore.newKeyFactory().setKind(KIND_USER);
 
     public static Entity validateUser(String username)
-            throws InvalidInputException, ExpiredTokenException, UserNotFoundException {
+            throws InvalidInputException, UserNotFoundException {
         return validateUser(datastore, username);
     }
 
     public static Entity validateUser(DatastoreReader txn, String username) 
-            throws InvalidInputException, ExpiredTokenException, UserNotFoundException {
+            throws InvalidInputException, UserNotFoundException {
 
-        if(!nonEmptyOrBlankField(username))
+        if(!ValidationUtils.nonEmptyOrBlankField(username))
             throw new InvalidInputException();
 
         Key userKey = usersKeyFactory.newKey(username);
@@ -41,11 +39,6 @@ public class UserUtils {
         }
 
         return user;
-    }
-
-
-    private static boolean nonEmptyOrBlankField(String field) {
-        return field != null && !field.isBlank();
     }
 
 }

@@ -20,12 +20,13 @@ import jakarta.ws.rs.core.Response.Status;
 
 import pt.unl.fct.di.adc.firstwebapp.data.AuthToken;
 import pt.unl.fct.di.adc.firstwebapp.data.TokenSummary;
-import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
+import pt.unl.fct.di.adc.firstwebapp.data.Constants;
 import pt.unl.fct.di.adc.firstwebapp.data.Role;
 import pt.unl.fct.di.adc.firstwebapp.data.SessionsWrapper;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.UnauthenticTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
@@ -53,7 +54,7 @@ public class ShowAuthSessionsResource {
             // Token validation
             Entity requester;
             try { requester = AuthUtils.validateToken( token.getTokenId() ); }
-            catch(InvalidInputException e) {
+            catch(InvalidInputException | UnauthenticTokenException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
             catch(ExpiredTokenException e) {
@@ -65,12 +66,12 @@ public class ShowAuthSessionsResource {
             
 
             // Role Validation
-            Role role = Role.valueOf(requester.getString(UserConstants.USER_ROLE));
+            Role role = Role.valueOf(requester.getString(Constants.USER_ROLE));
             if(role != Role.ADMIN)
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             // Query Tokens
-            String kind = UserConstants.KIND_TOKEN;
+            String kind = Constants.KIND_TOKEN;
             String gqlQuery = "select * from " + kind;
             Query<Entity> query = Query.newGqlQueryBuilder(Query.ResultType.ENTITY, gqlQuery).build();
             QueryResults<Entity> results = datastore.run(query);
@@ -78,10 +79,10 @@ public class ShowAuthSessionsResource {
             List<TokenSummary> summary = new ArrayList<>(); 
             while( results.hasNext() ) {
                 Entity entity = results.next();
-                String tokenId = entity.getString(UserConstants.TOKEN_ID);
-                String username = entity.getString(UserConstants.USER_NAME);
-                String roleString = entity.getString(UserConstants.USER_ROLE);
-                long expiresAt = entity.getLong(UserConstants.EXPIRES_AT) / 1000;
+                String tokenId = entity.getString(Constants.TOKEN_ID);
+                String username = entity.getString(Constants.USER_NAME);
+                String roleString = entity.getString(Constants.USER_ROLE);
+                long expiresAt = entity.getLong(Constants.EXPIRES_AT) / 1000;
                 summary.add( new TokenSummary(tokenId, username, roleString, expiresAt) );
             }
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.api.gax.rpc.UnauthenticatedException;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
@@ -21,7 +22,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import pt.unl.fct.di.adc.firstwebapp.data.MessageWrapper;
 import pt.unl.fct.di.adc.firstwebapp.data.Role;
-import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
+import pt.unl.fct.di.adc.firstwebapp.data.Constants;
 import pt.unl.fct.di.adc.firstwebapp.data.UsernameWrapper;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
@@ -61,7 +62,7 @@ public class LogoutResource {
             // Token validation
             Entity requester;
             try { requester = AuthUtils.validateToken( txn, request.getToken().getTokenId() ); }
-            catch(InvalidInputException e) {
+            catch(InvalidInputException | UnauthenticatedException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
             catch(ExpiredTokenException e) {
@@ -72,7 +73,7 @@ public class LogoutResource {
             }
 
             // Role Validation
-            Role role = Role.valueOf(requester.getString(UserConstants.USER_ROLE));
+            Role role = Role.valueOf(requester.getString(Constants.USER_ROLE));
             if( !Role.isAdminOrBofficer(role) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
@@ -88,13 +89,13 @@ public class LogoutResource {
             }
 
             // Role permissions enforce
-            if( !(Role.isAdmin(role) || data.getUsername() == requester.getString(UserConstants.USER_NAME)) )
+            if( !(Role.isAdmin(role) || data.getUsername() == requester.getString(Constants.USER_NAME)) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             // Query Tokens
             String gqlQuery = 
-                "SELECT __key__ FROM " + UserConstants.KIND_TOKEN + 
-                " WHERE " + UserConstants.USER_NAME + " = @username";
+                "SELECT __key__ FROM " + Constants.KIND_TOKEN + 
+                " WHERE " + Constants.USER_NAME + " = @username";
 
             Query<Key> query = Query.newGqlQueryBuilder(Query.ResultType.KEY, gqlQuery)
                                 .setBinding("username", data.getUsername())
@@ -103,6 +104,7 @@ public class LogoutResource {
 
             List<Key> keysToRemove = new ArrayList<>();
 
+            // Creation of array list of Keys, through iteration over the iterable results
             results.forEachRemaining(keysToRemove::add);
 
             if(!keysToRemove.isEmpty())

@@ -1,16 +1,22 @@
 package pt.unl.fct.di.adc.firstwebapp.util;
 
+import java.security.MessageDigest;
+
+import org.apache.commons.codec.digest.DigestUtils;
+
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.Transaction;
 
+import pt.unl.fct.di.adc.firstwebapp.data.Constants;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.UnauthenticTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
+import pt.unl.fct.di.adc.firstwebapp.security.SecurityConfig;
 
 public class AuthUtils {
 
@@ -26,15 +32,16 @@ public class AuthUtils {
 
     // Read-only
     public static Entity validateToken(String tokenId) 
-            throws InvalidInputException, ExpiredTokenException, UserNotFoundException {
+            throws InvalidInputException, ExpiredTokenException, UserNotFoundException, UnauthenticTokenException {
+
             return validateToken(datastore, tokenId);
     }
 
     // Read-Modify-Write
     public static Entity validateToken(DatastoreReader txn, String tokenId) 
-            throws InvalidInputException, ExpiredTokenException, UserNotFoundException {
+            throws InvalidInputException, ExpiredTokenException, UserNotFoundException, UnauthenticTokenException {
 
-        if(!nonEmptyOrBlankField(tokenId))
+        if(!ValidationUtils.nonEmptyOrBlankField(tokenId))
             throw new InvalidInputException();
 
         Key tokenKey = tokensKeyFactory.newKey(tokenId);
@@ -43,6 +50,9 @@ public class AuthUtils {
 
         if(token == null)
             throw new InvalidInputException();
+
+        if(!authenticate(token))
+            throw new UnauthenticTokenException();
 
         if(System.currentTimeMillis() > token.getLong(EXPIRES_AT)) {
             // TODO: LOG 
@@ -59,10 +69,22 @@ public class AuthUtils {
         return user;
     }
 
+    private static boolean authenticate(Entity token) {
 
-    private static boolean nonEmptyOrBlankField(String field) {
-        return field != null && !field.isBlank();
+        String username = token.getString(Constants.USER_NAME);
+        String role = token.getString(Constants.USER_ROLE);
+        String tokenId = token.getString(Constants.TOKEN_ID);
+        String sessionKey  = computeSessionKey(SecurityConfig.getMasterKey(), tokenId);
+
+        //hashed
+        String tokenHash = token.getString(Constants.HASH);
+        String computeHash = DigestUtils.sha512Hex(username + role + sessionKey);
+
+        return MessageDigest.isEqual(tokenHash.getBytes(), computeHash.getBytes());
     }
 
+    public static String computeSessionKey(String masterKey, String tokenId) {
+        return DigestUtils.sha512Hex( masterKey + tokenId );
+    }
 }
 

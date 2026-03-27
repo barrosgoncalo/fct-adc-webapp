@@ -1,5 +1,7 @@
 package pt.unl.fct.di.adc.firstwebapp.data;
 
+import pt.unl.fct.di.adc.firstwebapp.util.ValidationUtils;
+
 public class UsernameWrapper {
 
     private String username;
@@ -16,11 +18,7 @@ public class UsernameWrapper {
 	}
 
     public boolean isValid() {
-        return nonEmptyOrBlankField(username);
+        return ValidationUtils.nonEmptyOrBlankField(username);
     }
 
-    // auxiliary
-    private boolean nonEmptyOrBlankField(String field) {
-        return field != null && !field.isBlank();
-    }
 }

@@ -19,13 +19,12 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.servlet.http.HttpServletRequest;
 
 import pt.unl.fct.di.adc.firstwebapp.data.AuthToken;
-import pt.unl.fct.di.adc.firstwebapp.data.Role;
 import pt.unl.fct.di.adc.firstwebapp.data.LoginRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.TokenWrapper;
-import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
+import pt.unl.fct.di.adc.firstwebapp.data.Constants;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
-
+import pt.unl.fct.di.adc.firstwebapp.security.SecurityConfig;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 
@@ -33,7 +32,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Transaction;
 import com.google.cloud.datastore.DatastoreOptions;
 
@@ -78,7 +76,9 @@ public class LoginResource {
 		Key userKey = userKeyFactory.newKey(data.getUsername());
 
 		Transaction txn = datastore.newTransaction();
+
 		try {
+
 			Entity user = txn.get(userKey);
 			if (user == null) {
 				// Username does not exist
@@ -86,14 +86,17 @@ public class LoginResource {
 				return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
 			}
 
-			String hashedPWD = (String) user.getString(UserConstants.USER_PWD);
+			String hashedPWD = (String) user.getString(Constants.USER_PWD);
+            
 			if ( MessageDigest.isEqual( hashedPWD.getBytes(), (DigestUtils.sha512Hex(data.getPassword())).getBytes() )) {
 				// Login successful
                 
                 // Return token
-                String role = user.getString(UserConstants.USER_ROLE);
+                String masterKey = SecurityConfig.getMasterKey();
+                String role = user.getString(Constants.USER_ROLE);
                 
-                AuthToken token = new AuthToken(data.getUsername(), role);
+                AuthToken token = new AuthToken(data.getUsername(), role, masterKey);
+                
                 LOG.info(LOG_MESSAGE_LOGIN_SUCCESSFUL + data.getUsername());
 
                 Key tokenKey = tokensKeyFactory.newKey(token.getTokenId());
@@ -102,11 +105,12 @@ public class LoginResource {
                 // TODO: VERIFY IF THE TOKEN BELONGS TO THE DATABSE
 
                 newToken = Entity.newBuilder(tokenKey)
-                    .set( UserConstants.TOKEN_ID, token.getTokenId() )
-                    .set( UserConstants.USER_NAME, token.getUsername() )
-                    .set( UserConstants.USER_ROLE, token.getRole() )
-                    .set( UserConstants.ISSUED_AT, token.getIssuedAt() )
-                    .set( UserConstants.EXPIRES_AT, token.getExpiresAt() )
+                    .set( Constants.TOKEN_ID, token.getTokenId() )
+                    .set( Constants.USER_NAME, token.getUsername() )
+                    .set( Constants.USER_ROLE, token.getRole() )
+                    .set( Constants.ISSUED_AT, token.getIssuedAt() )
+                    .set( Constants.EXPIRES_AT, token.getExpiresAt() )
+                    .set( Constants.HASH, token.getHash() )
                     .build();
 
                 // Batch operation

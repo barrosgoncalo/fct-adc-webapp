@@ -28,4 +28,8 @@
     <include path="/**.cur" expiration="1m" />  <!-- 1 minute, normal is 12h or more -->
   </static-files>
   
+  <env-variables>
+    <env-var name="MASTER_KEY" value="k2D45qIS9nXJo3JgXuFKXm1VOc6QwpcsL3G0ftGYnetpHYV4MhHRkFGKrpdR5Wym" />
+</env-variables>
+
 </appengine-web-app>

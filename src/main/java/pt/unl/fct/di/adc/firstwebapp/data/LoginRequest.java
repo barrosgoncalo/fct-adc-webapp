@@ -1,5 +1,7 @@
 package pt.unl.fct.di.adc.firstwebapp.data;
 
+import pt.unl.fct.di.adc.firstwebapp.util.ValidationUtils;
+
 public class LoginRequest {
 
         private String username;
@@ -23,16 +25,8 @@ public class LoginRequest {
         
 
         public boolean isValid() {
-            return nonEmptyOrBlankField(username) &&
-                nonEmptyOrBlankField(password);
+            return ValidationUtils.nonEmptyOrBlankField(username) 
+                && ValidationUtils.nonEmptyOrBlankField(password);
         }
-
-
-
-        // auxiliary
-        private boolean nonEmptyOrBlankField(String field) {
-            return field != null && !field.isBlank();
-        }
-
 
 }

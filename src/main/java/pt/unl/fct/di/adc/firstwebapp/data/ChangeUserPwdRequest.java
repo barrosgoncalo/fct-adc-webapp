@@ -1,5 +1,7 @@
 package pt.unl.fct.di.adc.firstwebapp.data;
 
+import pt.unl.fct.di.adc.firstwebapp.util.ValidationUtils;
+
 public class ChangeUserPwdRequest {
 
     private String username;
@@ -28,12 +30,8 @@ public class ChangeUserPwdRequest {
 	}
 
     public boolean isValid() {
-        return nonEmptyOrBlankField(username)
-            && nonEmptyOrBlankField(oldPassword);
-    }
-    // auxiliary
-    private boolean nonEmptyOrBlankField(String field) {
-        return field != null && !field.isBlank();
+        return ValidationUtils.nonEmptyOrBlankField(username)
+            && ValidationUtils.nonEmptyOrBlankField(oldPassword);
     }
 
 }

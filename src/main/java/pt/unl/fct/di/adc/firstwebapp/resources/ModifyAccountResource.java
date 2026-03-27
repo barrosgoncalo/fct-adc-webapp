@@ -21,11 +21,12 @@ import pt.unl.fct.di.adc.firstwebapp.data.MessageWrapper;
 import pt.unl.fct.di.adc.firstwebapp.data.ModifyUserRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.ModifyUserRequest.AttributesData;
 import pt.unl.fct.di.adc.firstwebapp.data.Role;
-import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
+import pt.unl.fct.di.adc.firstwebapp.data.Constants;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.UnauthenticTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AuthUtils;
@@ -59,7 +60,7 @@ public class ModifyAccountResource {
 
             Entity requester;
             try { requester = AuthUtils.validateToken(txn, tokenId); }
-            catch(InvalidInputException e) {
+            catch(InvalidInputException | UnauthenticTokenException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
             catch(ExpiredTokenException e) {
@@ -70,7 +71,7 @@ public class ModifyAccountResource {
             }
 
             // Role Validation
-            String roleString = requester.getString(UserConstants.USER_ROLE);
+            String roleString = requester.getString(Constants.USER_ROLE);
             if(!Role.isDefined(roleString))
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
@@ -88,14 +89,14 @@ public class ModifyAccountResource {
             }
 
             // Role permissions enforce
-            if( !(Role.isAdmin(role) || username == requester.getString(UserConstants.USER_NAME)) )
+            if( !(Role.isAdmin(role) || username == requester.getString(Constants.USER_NAME)) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             AttributesData attributes = data.getAttributes();
 
             Entity modUser = Entity.newBuilder(user)
-                    .set(UserConstants.USER_PHONE, attributes.getPhone())
-                    .set(UserConstants.USER_ADDRESS, attributes.getAddress())
+                    .set(Constants.USER_PHONE, attributes.getPhone())
+                    .set(Constants.USER_ADDRESS, attributes.getAddress())
                     .build();
 
             txn.put(modUser);

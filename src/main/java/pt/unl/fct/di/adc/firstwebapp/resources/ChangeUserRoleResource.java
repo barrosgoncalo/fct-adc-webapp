@@ -17,11 +17,12 @@ import jakarta.ws.rs.core.Response.Status;
 import pt.unl.fct.di.adc.firstwebapp.data.ChangeUserRoleRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.MessageWrapper;
 import pt.unl.fct.di.adc.firstwebapp.data.Role;
-import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
+import pt.unl.fct.di.adc.firstwebapp.data.Constants;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.UnauthenticTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
@@ -56,7 +57,7 @@ public class ChangeUserRoleResource {
             // Token validation
             Entity requester;
             try { requester = AuthUtils.validateToken(txn, request.getToken().getTokenId()); }
-            catch(InvalidInputException e) {
+            catch(InvalidInputException | UnauthenticTokenException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
             catch(ExpiredTokenException e) {
@@ -67,12 +68,12 @@ public class ChangeUserRoleResource {
             }
 
             // Role Validation
-            Role role = Role.valueOf(requester.getString(UserConstants.USER_ROLE));
+            Role role = Role.valueOf(requester.getString(Constants.USER_ROLE));
             if( !Role.isAdmin(role) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             Entity user;
-            try{ user = UserUtils.validateUser( data.getUsername()); }
+            try{ user = UserUtils.validateUser( data.getUsername() ); }
             catch(InvalidInputException e) {
                 // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
@@ -83,7 +84,7 @@ public class ChangeUserRoleResource {
             }
 
             Entity modUser = Entity.newBuilder(user)
-                    .set(UserConstants.USER_ROLE, data.getNewRole())
+                    .set(Constants.USER_ROLE, data.getNewRole())
                     .build();
                     
             txn.put(modUser);

@@ -26,7 +26,7 @@ import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 import pt.unl.fct.di.adc.firstwebapp.data.UserRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.UserResponse;
 import pt.unl.fct.di.adc.firstwebapp.data.Role;
-import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
+import pt.unl.fct.di.adc.firstwebapp.data.Constants;
 
 @Path("/createaccount")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -50,8 +50,10 @@ public class CreateUserResource {
         if( !data.isValid() || !Role.isDefined(data.getRole()) )
             return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
 
+        Transaction txn = datastore.newTransaction();
+
         try {
-            Transaction txn = datastore.newTransaction();
+
             Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.getUsername());
             Entity user = txn.get(userKey);
 
@@ -60,13 +62,14 @@ public class CreateUserResource {
                 return new ErrorResponse(Status.CONFLICT, ErrorCode.USER_ALREADY_EXISTS).toResponse();
             } else {
                 user = Entity.newBuilder(userKey)
-                        .set( UserConstants.USER_NAME, data.getUsername() )
-                        .set( UserConstants.USER_PWD , DigestUtils.sha512Hex(data.getPassword()) )
-                        .set( UserConstants.USER_PHONE, data.getPhone() )
-                        .set( UserConstants.USER_ADDRESS, data.getAddress())
-                        .set( UserConstants.USER_ROLE, data.getRole())
-                        .set( UserConstants.USER_CREATION_TIME, Timestamp.now())
+                        .set( Constants.USER_NAME, data.getUsername() )
+                        .set( Constants.USER_PWD , DigestUtils.sha512Hex(data.getPassword()) )
+                        .set( Constants.USER_PHONE, data.getPhone() )
+                        .set( Constants.USER_ADDRESS, data.getAddress())
+                        .set( Constants.USER_ROLE, data.getRole())
+                        .set( Constants.USER_CREATION_TIME, Timestamp.now())
                         .build();
+
                 txn.put(user);
                 txn.commit();
                 LOG.info("User registered " + data.getUsername());

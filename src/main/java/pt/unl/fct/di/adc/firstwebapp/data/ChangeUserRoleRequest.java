@@ -1,5 +1,7 @@
 package pt.unl.fct.di.adc.firstwebapp.data;
 
+import pt.unl.fct.di.adc.firstwebapp.util.ValidationUtils;
+
 public class ChangeUserRoleRequest {
 
     private String username;
@@ -18,17 +20,12 @@ public class ChangeUserRoleRequest {
 	}
 
     public boolean isValid() {
-        return nonEmptyOrBlankField(username)
-            && nonEmptyOrBlankField(newRole);
+        return ValidationUtils.nonEmptyOrBlankField(username)
+            && ValidationUtils.nonEmptyOrBlankField(newRole);
     }
 
 	public String getNewRole() {
 		return newRole;
 	}
-
-    // auxiliary
-    private boolean nonEmptyOrBlankField(String field) {
-        return field != null && !field.isBlank();
-    }
 
 }

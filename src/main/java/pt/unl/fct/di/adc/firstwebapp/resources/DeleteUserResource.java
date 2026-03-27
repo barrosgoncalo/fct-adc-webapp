@@ -22,14 +22,16 @@ import jakarta.ws.rs.core.Response.Status;
 import pt.unl.fct.di.adc.firstwebapp.data.UsernameWrapper;
 import pt.unl.fct.di.adc.firstwebapp.data.MessageWrapper;
 import pt.unl.fct.di.adc.firstwebapp.data.Role;
-import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
+import pt.unl.fct.di.adc.firstwebapp.data.Constants;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 import pt.unl.fct.di.adc.firstwebapp.util.AuthUtils;
 import pt.unl.fct.di.adc.firstwebapp.util.UserUtils;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.UnauthenticTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 
 
@@ -75,18 +77,20 @@ public class DeleteUserResource {
             // Token verification
             Entity requester;
             try { requester = AuthUtils.validateToken(txn, request.getToken().getTokenId()); }
-            catch(InvalidInputException e) {
+            catch(InvalidInputException | UnauthenticTokenException e) {
                 // TODO: LOG
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
-            // TODO : Dubious Error to show, if the requester doesn't exist in DB
+            catch(ExpiredTokenException e) {
+                return new ErrorResponse(Status.OK, ErrorCode.TOKEN_EXPIRED).toResponse();
+            }
             catch(UserNotFoundException e) {
                 // TODO: LOG
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
 
             // Verify authorization
-            String role = requester.getString(UserConstants.USER_ROLE);
+            String role = requester.getString(Constants.USER_ROLE);
             if(Role.ADMIN != Role.valueOf(role)) {
                 // TODO: LOG
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
@@ -97,8 +101,8 @@ public class DeleteUserResource {
             // TODO : FURTHER TEST TOKEN REMOVAL UPPON ACCOUNT DELETION
             // Query Tokens
             String gqlQuery = 
-                "SELECT __key__ FROM " + UserConstants.KIND_TOKEN + 
-                " WHERE " + UserConstants.USER_NAME + " = @username";
+                "SELECT __key__ FROM " + Constants.KIND_TOKEN + 
+                " WHERE " + Constants.USER_NAME + " = @username";
 
             Query<Key> query = Query.newGqlQueryBuilder(Query.ResultType.KEY, gqlQuery)
                                 .setBinding("username", data.getUsername())

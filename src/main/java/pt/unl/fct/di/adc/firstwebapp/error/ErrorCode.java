@@ -1,6 +1,7 @@
 package pt.unl.fct.di.adc.firstwebapp.error;
 
 public enum ErrorCode {
+
     INVALID_CREDENTIALS("9900", "The username-password pair is not valid"),
     USER_ALREADY_EXISTS("9901", "Error in creating an account because the username already exists"),
     USER_NOT_FOUND("9902", "The username referred in the operation doesn’t exist in registered accounts"),
