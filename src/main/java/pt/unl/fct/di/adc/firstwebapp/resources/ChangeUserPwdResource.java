@@ -57,7 +57,7 @@ public class ChangeUserPwdResource {
 
         try { 
 
-            // Token validation
+            // Token Validation
             Entity requester;
             try { requester = AuthUtils.validateToken(txn, request.getToken().getTokenId()); }
             catch(InvalidInputException | UnauthenticTokenException e) {
@@ -70,11 +70,7 @@ public class ChangeUserPwdResource {
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
 
-            // Role Validation
-            Role role = Role.valueOf(requester.getString(Constants.USER_ROLE));
-            if( !Role.isAdmin(role) )
-                return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
-
+            // User Validation
             Entity user;
             try{ user = UserUtils.validateUser( data.getUsername()); }
             catch(InvalidInputException e) {
@@ -91,12 +87,12 @@ public class ChangeUserPwdResource {
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
 
-            // Password Verification
+            // Password Validation
             String oldPwd = DigestUtils.sha512Hex( data.getOldPassword() );
             String hashedPwd = user.getString(Constants.USER_PWD);
 
             if( !MessageDigest.isEqual(oldPwd.getBytes(), hashedPwd.getBytes()) )
-                return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
+                return new ErrorResponse(Status.OK, ErrorCode.INVALID_CREDENTIALS).toResponse();
 
             String newPwd = DigestUtils.sha512Hex(data.getNewPassword());
 

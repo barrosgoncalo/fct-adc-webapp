@@ -7,6 +7,7 @@ pt/unl/fct/di/adc/firstwebapp/resources/ShowUsersResource.class
 pt/unl/fct/di/adc/firstwebapp/data/UserSummary.class
 pt/unl/fct/di/adc/firstwebapp/data/ChangeUserRoleRequest.class
 pt/unl/fct/di/adc/firstwebapp/resources/LogoutResource.class
+pt/unl/fct/di/adc/firstwebapp/data/MessageDiaest.class
 pt/unl/fct/di/adc/firstwebapp/security/SecurityConfig.class
 pt/unl/fct/di/adc/firstwebapp/data/MessageWrapper.class
 pt/unl/fct/di/adc/firstwebapp/resources/ShowAuthSessionsResource.class
@@ -16,6 +17,7 @@ pt/unl/fct/di/adc/firstwebapp/data/UsersWrapper.class
 pt/unl/fct/di/adc/firstwebapp/exceptions/UnauthenticTokenException.class
 pt/unl/fct/di/adc/firstwebapp/util/AppResponse.class
 pt/unl/fct/di/adc/firstwebapp/data/Constants.class
+pt/unl/fct/di/adc/firstwebapp/util/ValidationUtils.class
 pt/unl/fct/di/adc/firstwebapp/data/ChangeUserPwdRequest.class
 pt/unl/fct/di/adc/firstwebapp/resources/ChangeUserPwdResource.class
 pt/unl/fct/di/adc/firstwebapp/resources/CreateUserResource.class

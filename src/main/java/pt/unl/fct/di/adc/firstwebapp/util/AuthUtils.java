@@ -73,12 +73,21 @@ public class AuthUtils {
 
         String username = token.getString(Constants.USER_NAME);
         String role = token.getString(Constants.USER_ROLE);
+        long issuedAt = token.getLong(Constants.ISSUED_AT);
+        long expiresAt = token.getLong(Constants.EXPIRES_AT);
         String tokenId = token.getString(Constants.TOKEN_ID);
         String sessionKey  = computeSessionKey(SecurityConfig.getMasterKey(), tokenId);
 
         //hashed
         String tokenHash = token.getString(Constants.HASH);
-        String computeHash = DigestUtils.sha512Hex(username + role + sessionKey);
+        String computeHash = 
+            DigestUtils.sha512Hex(
+                    username
+                    + role
+                    + String.valueOf( issuedAt )
+                    + String.valueOf( expiresAt )
+                    + sessionKey
+                );
 
         return MessageDigest.isEqual(tokenHash.getBytes(), computeHash.getBytes());
     }

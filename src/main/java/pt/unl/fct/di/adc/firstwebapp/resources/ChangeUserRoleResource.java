@@ -1,10 +1,17 @@
 package pt.unl.fct.di.adc.firstwebapp.resources;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.Transaction;
 
 import jakarta.ws.rs.Consumes;
@@ -24,6 +31,7 @@ import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.UnauthenticTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
+import pt.unl.fct.di.adc.firstwebapp.security.SecurityConfig;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 import pt.unl.fct.di.adc.firstwebapp.util.AuthUtils;
@@ -88,6 +96,36 @@ public class ChangeUserRoleResource {
                     .build();
                     
             txn.put(modUser);
+
+
+            // Query Tokens
+            String gqlQuery = 
+                "SELECT * FROM " + Constants.KIND_TOKEN + 
+                " WHERE " + Constants.USER_NAME + " = @username";
+
+            Query<Entity> query = Query.newGqlQueryBuilder(Query.ResultType.ENTITY, gqlQuery)
+                                .setBinding("username", data.getUsername())
+                                .build();
+            QueryResults<Entity> results = datastore.run(query);
+
+            // Creation of array list of Keys, through iteration over the iterable results
+            while( results.hasNext() ) {
+                Entity oldToken = results.next();
+                Entity newToken = Entity.newBuilder(oldToken)
+                    .set(Constants.USER_ROLE, data.getNewRole())
+                    .set(Constants.HASH, 
+                            DigestUtils.sha512Hex(
+                                data.getUsername()
+                                + data.getNewRole()
+                                + String.valueOf( oldToken.getLong(Constants.ISSUED_AT) )
+                                + String.valueOf( oldToken.getLong(Constants.EXPIRES_AT) )
+                                + AuthUtils.computeSessionKey(SecurityConfig.getMasterKey(), oldToken.getString(Constants.TOKEN_ID))
+                            )
+                        )
+                    .build();
+                txn.put(newToken);
+            }
+
             txn.commit();
             //TODO : LOG
 

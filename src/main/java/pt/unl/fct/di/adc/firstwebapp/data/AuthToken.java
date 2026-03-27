@@ -60,6 +60,7 @@ public class AuthToken {
 		return this.expiresAt;
 	}
 
+    @JsonIgnore
     public String getHash() {
         return this.hash;
     }
