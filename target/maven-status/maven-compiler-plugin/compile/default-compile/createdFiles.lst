@@ -6,6 +6,7 @@ pt/unl/fct/di/adc/firstwebapp/exceptions/ExpiredTokenException.class
 pt/unl/fct/di/adc/firstwebapp/resources/ShowUsersResource.class
 pt/unl/fct/di/adc/firstwebapp/data/UserSummary.class
 pt/unl/fct/di/adc/firstwebapp/data/ChangeUserRoleRequest.class
+pt/unl/fct/di/adc/firstwebapp/resources/LogoutResource.class
 pt/unl/fct/di/adc/firstwebapp/data/MessageWrapper.class
 pt/unl/fct/di/adc/firstwebapp/resources/ShowAuthSessionsResource.class
 pt/unl/fct/di/adc/firstwebapp/data/AuthToken.class

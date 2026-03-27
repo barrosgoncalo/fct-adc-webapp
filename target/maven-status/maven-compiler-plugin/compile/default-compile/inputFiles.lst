@@ -25,6 +25,7 @@
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/CreateUserResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/DeleteUserResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/LoginResource.java
+/Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/LogoutResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/ModifyAccountResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/ShowAuthSessionsResource.java
 /Users/myco/Desktop/ADC/INDIVIDUAL-EVALUATION/src/main/java/pt/unl/fct/di/adc/firstwebapp/resources/ShowUserRoleResource.java

@@ -31,8 +31,8 @@ import pt.unl.fct.di.adc.firstwebapp.util.UserUtils;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ShowUserRoleResource {
 
-    Logger LOG = Logger.getLogger(ShowUserRoleResource.class.getName());
-    Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private static final Logger LOG = Logger.getLogger(ShowUserRoleResource.class.getName());
+    private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
     public ShowUserRoleResource () {}
 

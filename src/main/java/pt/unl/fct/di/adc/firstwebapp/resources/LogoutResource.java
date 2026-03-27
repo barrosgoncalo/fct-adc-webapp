@@ -5,6 +5,10 @@ import java.util.logging.Logger;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.Transaction;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -13,9 +17,9 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import pt.unl.fct.di.adc.firstwebapp.data.MessageWrapper;
 import pt.unl.fct.di.adc.firstwebapp.data.Role;
 import pt.unl.fct.di.adc.firstwebapp.data.UserConstants;
-import pt.unl.fct.di.adc.firstwebapp.data.UserSummary;
 import pt.unl.fct.di.adc.firstwebapp.data.UsernameWrapper;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
@@ -27,12 +31,14 @@ import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
 import pt.unl.fct.di.adc.firstwebapp.util.AuthUtils;
 import pt.unl.fct.di.adc.firstwebapp.util.UserUtils;
 
-@Path("/showuserrole")
+@Path("/logout")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LogoutResource {
 
-    Logger LOG = Logger.getLogger(LogoutResource.class.getName());
-    Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private static final String SUCCESS = "Logout successful";
+
+    private static final Logger LOG = Logger.getLogger(LogoutResource.class.getName());
+    private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
     public LogoutResource () {}
 
@@ -46,11 +52,13 @@ public class LogoutResource {
         if(!data.isValid())
             return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
 
+        Transaction txn = datastore.newTransaction();
+
         try { 
 
             // Token validation
             Entity requester;
-            try { requester = AuthUtils.validateToken(request.getToken().getTokenId()); }
+            try { requester = AuthUtils.validateToken( txn, request.getToken().getTokenId() ); }
             catch(InvalidInputException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
@@ -66,8 +74,8 @@ public class LogoutResource {
             if( !Role.isAdminOrBofficer(role) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
-            Entity user;
-            try{ user = UserUtils.validateUser( data.getUsername()); }
+            // User Validation
+            try{ UserUtils.validateUser( txn, data.getUsername() ); }
             catch(InvalidInputException e) {
                 // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
@@ -77,17 +85,34 @@ public class LogoutResource {
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
-            UserSummary summary = new UserSummary(
-                        user.getString(UserConstants.USER_NAME),
-                        user.getString(UserConstants.USER_ROLE)
-                        );
+            // Role permissions enforce
+            if( !(Role.isAdmin(role) || data.getUsername() == requester.getString(UserConstants.USER_NAME)) )
+                return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
-            return new AppResponse <UserSummary>("success", summary).toResponse();
+            // Query Tokens
+            String gqlQuery = 
+                "SELECT __key__ FROM " + UserConstants.KIND_TOKEN + 
+                " WHERE " + UserConstants.USER_NAME + " = @username";
+
+            Query<Key> query = Query.newGqlQueryBuilder(Query.ResultType.KEY, gqlQuery)
+                                .setBinding("username", data.getUsername())
+                                .build();
+            QueryResults<Key> results = datastore.run(query);
+
+            while( results.hasNext() )
+                txn.delete( results.next() );
+
+            txn.commit();
+
+            return new AppResponse <MessageWrapper>("success", new MessageWrapper(SUCCESS)).toResponse();
 
         } catch (Exception e) {
-            LOG.severe("Error modifying user: " + e.getMessage());
+            LOG.severe("Error lougout user: " + e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
+        } finally {
+            if(txn.isActive())
+                txn.rollback();
         }
-    }
 
+    }
 }

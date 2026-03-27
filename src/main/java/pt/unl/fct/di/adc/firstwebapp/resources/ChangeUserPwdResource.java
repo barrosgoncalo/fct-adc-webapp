@@ -37,8 +37,8 @@ public class ChangeUserPwdResource {
 
     private static final String SUCCESS = "Password changed successfully";
 
-    Logger LOG = Logger.getLogger(ChangeUserPwdResource.class.getName());
-    Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private static final Logger LOG = Logger.getLogger(ChangeUserPwdResource.class.getName());
+    private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
     public ChangeUserPwdResource () {}
 

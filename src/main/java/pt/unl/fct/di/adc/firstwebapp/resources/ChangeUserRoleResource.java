@@ -34,8 +34,8 @@ public class ChangeUserRoleResource {
 
     private static final String SUCCESS = "Role updated successfully";
 
-    Logger LOG = Logger.getLogger(ChangeUserRoleResource.class.getName());
-    Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private static final Logger LOG = Logger.getLogger(ChangeUserRoleResource.class.getName());
+    private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
     public ChangeUserRoleResource () {}
 

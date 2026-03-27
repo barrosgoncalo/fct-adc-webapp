@@ -36,6 +36,9 @@ import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ShowAuthSessionsResource {
 
+    private static final Logger LOG = Logger.getLogger(ShowAuthSessionsResource.class.getName());
+    private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+
     public ShowAuthSessionsResource() {}
 
     @POST
@@ -43,9 +46,6 @@ public class ShowAuthSessionsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response doShowAuthSessions(AppRequest<Void> request)
         throws InvalidInputException, ExpiredTokenException, UserNotFoundException {
-
-        Logger LOG = Logger.getLogger(ShowAuthSessionsResource.class.getName());
-        Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
         AuthToken token = request.getToken();
 
