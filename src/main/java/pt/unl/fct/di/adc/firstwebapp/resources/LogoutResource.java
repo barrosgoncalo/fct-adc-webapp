@@ -1,5 +1,7 @@
 package pt.unl.fct.di.adc.firstwebapp.resources;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.cloud.datastore.Datastore;
@@ -99,8 +101,11 @@ public class LogoutResource {
                                 .build();
             QueryResults<Key> results = datastore.run(query);
 
-            while( results.hasNext() )
-                txn.delete( results.next() );
+            List<Key> keysToRemove = new ArrayList<>();
+
+            results.forEachRemaining(keysToRemove::add);
+
+            txn.delete( keysToRemove.toArray(new Key[0]) );
 
             txn.commit();
 
