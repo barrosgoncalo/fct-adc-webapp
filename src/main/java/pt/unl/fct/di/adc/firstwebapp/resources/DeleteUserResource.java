@@ -5,6 +5,9 @@ import java.util.logging.Logger;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.Transaction;
 
 import jakarta.ws.rs.POST;
@@ -88,6 +91,21 @@ public class DeleteUserResource {
             }
 
             txn.delete(user.getKey());
+
+            // TODO : FURTHER TEST TOKEN REMOVAL UPPON ACCOUNT DELETION
+            // Query Tokens
+            String gqlQuery = 
+                "SELECT __key__ FROM " + UserConstants.KIND_TOKEN + 
+                " WHERE " + UserConstants.USER_NAME + " = @username";
+
+            Query<Key> query = Query.newGqlQueryBuilder(Query.ResultType.KEY, gqlQuery)
+                                .setBinding("username", data.getUsername())
+                                .build();
+            QueryResults<Key> results = datastore.run(query);
+
+            while( results.hasNext() )
+                txn.delete( results.next() );
+
             txn.commit();
 
             LOG.info("Deleted user " + data.getUsername() + " with token " + request.getToken().getTokenId());
