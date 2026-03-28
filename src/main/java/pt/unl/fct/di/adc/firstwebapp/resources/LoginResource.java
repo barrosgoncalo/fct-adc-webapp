@@ -24,9 +24,12 @@ import pt.unl.fct.di.adc.firstwebapp.data.TokenWrapper;
 import pt.unl.fct.di.adc.firstwebapp.data.Constants;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 import pt.unl.fct.di.adc.firstwebapp.security.SecurityConfig;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
+import pt.unl.fct.di.adc.firstwebapp.util.UserUtils;
 
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Entity;
@@ -71,7 +74,7 @@ public class LoginResource {
 		LOG.fine(LOG_MESSAGE_LOGIN_ATTEMP + data.getUsername());
 
         if(!data.isValid())
-            return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
+            return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
 		Key userKey = userKeyFactory.newKey(data.getUsername());
 
@@ -79,12 +82,14 @@ public class LoginResource {
 
 		try {
 
-			Entity user = txn.get(userKey);
-			if (user == null) {
-				// Username does not exist
-				LOG.warning(LOG_MESSAGE_LOGIN_ATTEMP + data.getUsername());
-				return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
-			}
+            Entity user;
+            try{ user = UserUtils.validateUser(txn, data.getUsername()); }
+            catch(InvalidInputException e) {
+                return new ErrorResponse(Status.OK, ErrorCode.INVALID_CREDENTIALS).toResponse();
+            }
+            catch(UserNotFoundException e) {
+                return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
+            }
 
 			String hashedPWD = (String) user.getString(Constants.USER_PWD);
             
@@ -129,7 +134,7 @@ public class LoginResource {
 			LOG.severe(e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
 		} finally {
-			if (txn.isActive()) {
+			if (txn != null && txn.isActive()) {
 				txn.rollback();
 			}
 		}

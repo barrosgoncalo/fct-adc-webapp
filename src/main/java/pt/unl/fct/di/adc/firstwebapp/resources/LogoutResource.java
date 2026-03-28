@@ -53,7 +53,7 @@ public class LogoutResource {
         UsernameWrapper data = request.getInput();
 
         if(!data.isValid())
-            return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
+            return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
         Transaction txn = datastore.newTransaction();
 
@@ -72,10 +72,6 @@ public class LogoutResource {
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
 
-            // Role Validation
-            Role role = Role.valueOf(requester.getString(Constants.USER_ROLE));
-            if( !Role.isAdminOrBofficer(role) )
-                return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             // User Validation
             try{ UserUtils.validateUser( txn, data.getUsername() ); }
@@ -88,7 +84,9 @@ public class LogoutResource {
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
-            // Role permissions enforce
+            // Role Permissions enforce
+            Role role = Role.valueOf(requester.getString(Constants.USER_ROLE));
+
             if( !(Role.isAdmin(role) || data.getUsername() == requester.getString(Constants.USER_NAME)) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
@@ -106,9 +104,10 @@ public class LogoutResource {
 
             // Creation of array list of Keys, through iteration over the iterable results
             results.forEachRemaining(keysToRemove::add);
+            
 
             if(!keysToRemove.isEmpty())
-                txn.delete( keysToRemove.toArray(new Key[0]) );
+                txn.delete( keysToRemove.toArray( new Key[0]) );
 
             txn.commit();
 

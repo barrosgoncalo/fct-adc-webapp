@@ -1,5 +1,6 @@
 package pt.unl.fct.di.adc.firstwebapp.data;
 
+import pt.unl.fct.di.adc.firstwebapp.util.ValidationUtils;
 
 public class ModifyUserRequest {
 
@@ -21,12 +22,17 @@ public class ModifyUserRequest {
         return attributes;
     }
 
+    public boolean isValid() {
+        return ValidationUtils.nonEmptyOrBlankField(username)
+            && attributes != null
+            && ValidationUtils.nonEmptyOrBlankField(attributes.getPhone())
+            && ValidationUtils.nonEmptyOrBlankField(attributes.getAddress());
+    }
 
     public static class AttributesData {
 
         private String phone;
         private String address;
-        private String username;
 
         public AttributesData() {}
 
@@ -41,10 +47,6 @@ public class ModifyUserRequest {
 
         public String getAddress() {
             return address;
-        }
-
-        public String getUsername() {
-            return username;
         }
 
     }

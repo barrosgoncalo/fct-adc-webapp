@@ -51,6 +51,9 @@ public class ModifyAccountResource {
 
         LOG.fine("Attempt to modify account: " + data.getUsername());
 
+        if(!data.isValid())
+            return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
+
         Transaction txn = datastore.newTransaction();
 
         try {
@@ -89,7 +92,7 @@ public class ModifyAccountResource {
             }
 
             // Role permissions enforce
-            if( !(Role.isAdmin(role) || username == requester.getString(Constants.USER_NAME)) )
+            if( !(Role.isAdmin(role) || username.equals(requester.getString(Constants.USER_NAME))) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             AttributesData attributes = data.getAttributes();
@@ -114,7 +117,7 @@ public class ModifyAccountResource {
             LOG.severe("Error modifying user: " + e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
         } finally {
-            if(txn.isActive())
+            if(txn != null && txn.isActive())
                 txn.rollback();
         }
     }

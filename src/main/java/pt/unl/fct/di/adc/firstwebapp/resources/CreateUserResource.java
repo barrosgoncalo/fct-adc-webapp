@@ -47,8 +47,8 @@ public class CreateUserResource {
 
         LOG.fine("Attempt to create account: " + data.getUsername());
 
-        if( !data.isValid() || !Role.isDefined(data.getRole()) )
-            return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
+        if( !data.isValid() )
+            return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
         Transaction txn = datastore.newTransaction();
 

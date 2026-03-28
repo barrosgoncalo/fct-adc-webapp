@@ -33,7 +33,6 @@ import pt.unl.fct.di.adc.firstwebapp.util.UserUtils;
 public class ShowUserRoleResource {
 
     private static final Logger LOG = Logger.getLogger(ShowUserRoleResource.class.getName());
-    private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
     public ShowUserRoleResource () {}
 
@@ -45,7 +44,7 @@ public class ShowUserRoleResource {
         UsernameWrapper data = request.getInput();
 
         if(!data.isValid())
-            return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
+            return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
         try { 
 
@@ -63,8 +62,9 @@ public class ShowUserRoleResource {
             }
 
             // Role Validation
-            Role role = Role.valueOf(requester.getString(Constants.USER_ROLE));
-            if( !Role.isAdminOrBofficer(role) )
+            Role requesterRole = Role.valueOf(requester.getString(Constants.USER_ROLE));
+
+            if( !Role.isAdminOrBofficer(requesterRole) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             Entity user;
@@ -78,14 +78,15 @@ public class ShowUserRoleResource {
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
+            Role userRole = Role.valueOf(user.getString(Constants.USER_ROLE));
+
+            if( !requesterRole.isHigherDegree(userRole) )
+                return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
+
             UserSummary summary = new UserSummary(
                         user.getString(Constants.USER_NAME),
                         user.getString(Constants.USER_ROLE)
                         );
-
-            // TODO :  Check role permissions
-            // Can the ADMIN/BOFFICER check any role??
-            // Can the BOFFICER check an ADMIN role??
 
             return new AppResponse <UserSummary>("success", summary).toResponse();
 

@@ -56,15 +56,16 @@ public class ChangeUserRoleResource {
         ChangeUserRoleRequest data = request.getInput();
 
         if(!data.isValid())
-            return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
+            return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
+        // transaction initialization
         Transaction txn = datastore.newTransaction();
 
         try { 
 
             // Token validation
             Entity requester;
-            try { requester = AuthUtils.validateToken(txn, request.getToken().getTokenId()); }
+            try { requester = AuthUtils.validateToken( txn, request.getToken().getTokenId() ); }
             catch(InvalidInputException | UnauthenticTokenException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
@@ -81,7 +82,7 @@ public class ChangeUserRoleResource {
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             Entity user;
-            try{ user = UserUtils.validateUser( data.getUsername() ); }
+            try{ user = UserUtils.validateUser( txn, data.getUsername() ); }
             catch(InvalidInputException e) {
                 // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
@@ -91,13 +92,12 @@ public class ChangeUserRoleResource {
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
+            // modified user creation
             Entity modUser = Entity.newBuilder(user)
                     .set(Constants.USER_ROLE, data.getNewRole())
                     .build();
-                    
-            txn.put(modUser);
 
-
+            
             // Query Tokens
             String gqlQuery = 
                 "SELECT * FROM " + Constants.KIND_TOKEN + 
@@ -107,6 +107,8 @@ public class ChangeUserRoleResource {
                                 .setBinding("username", data.getUsername())
                                 .build();
             QueryResults<Entity> results = datastore.run(query);
+            
+            txn.put(modUser);
 
             // Creation of array list of Keys, through iteration over the iterable results
             while( results.hasNext() ) {
@@ -120,7 +122,7 @@ public class ChangeUserRoleResource {
                                 + String.valueOf( oldToken.getLong(Constants.ISSUED_AT) )
                                 + String.valueOf( oldToken.getLong(Constants.EXPIRES_AT) )
                                 + AuthUtils.computeSessionKey(SecurityConfig.getMasterKey(), oldToken.getString(Constants.TOKEN_ID))
-                            )
+                                )
                         )
                     .build();
                 txn.put(newToken);
@@ -135,7 +137,7 @@ public class ChangeUserRoleResource {
             LOG.severe("Error modifying user: " + e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
         } finally {
-            if(txn.isActive())
+            if(txn != null && txn.isActive())
                 txn.rollback();
         }
     }

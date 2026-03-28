@@ -10,10 +10,10 @@ public class ChangeUserPwdRequest {
 
     public ChangeUserPwdRequest() {}
 
-    public ChangeUserPwdRequest(String username, String newRole) {
+    public ChangeUserPwdRequest(String username, String oldPassword, String newPassword) {
         this.username = username;
-        this.oldPassword = newRole;
-        this.newPassword = newRole;
+        this.oldPassword = oldPassword;
+        this.newPassword = newPassword;
     }
 
     // getters
@@ -31,7 +31,8 @@ public class ChangeUserPwdRequest {
 
     public boolean isValid() {
         return ValidationUtils.nonEmptyOrBlankField(username)
-            && ValidationUtils.nonEmptyOrBlankField(oldPassword);
+            && ValidationUtils.nonEmptyOrBlankField(oldPassword)
+            && ValidationUtils.nonEmptyOrBlankField(newPassword);
     }
 
 }

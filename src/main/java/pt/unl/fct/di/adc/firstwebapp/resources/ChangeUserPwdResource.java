@@ -51,7 +51,7 @@ public class ChangeUserPwdResource {
         ChangeUserPwdRequest data = request.getInput();
 
         if(!data.isValid())
-            return new ErrorResponse(Status.BAD_REQUEST, ErrorCode.INVALID_INPUT).toResponse();
+            return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
         Transaction txn = datastore.newTransaction();
 
@@ -72,7 +72,7 @@ public class ChangeUserPwdResource {
 
             // User Validation
             Entity user;
-            try{ user = UserUtils.validateUser( data.getUsername()); }
+            try{ user = UserUtils.validateUser( txn, data.getUsername()); }
             catch(InvalidInputException e) {
                 // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
@@ -89,10 +89,10 @@ public class ChangeUserPwdResource {
             }
 
             // Password Validation
-            String oldPwd = DigestUtils.sha512Hex( data.getOldPassword() );
-            String hashedPwd = user.getString(Constants.USER_PWD);
+            String providedPwd = DigestUtils.sha512Hex( data.getOldPassword() );
+            String currentPwd = user.getString(Constants.USER_PWD);
 
-            if( !MessageDigest.isEqual(oldPwd.getBytes(), hashedPwd.getBytes()) )
+            if( !MessageDigest.isEqual(providedPwd.getBytes(), currentPwd.getBytes()) )
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_CREDENTIALS).toResponse();
 
             String newPwd = DigestUtils.sha512Hex(data.getNewPassword());
@@ -111,7 +111,7 @@ public class ChangeUserPwdResource {
             LOG.severe("Error modifying user password: " + e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
         } finally {
-            if(txn.isActive())
+            if(txn != null && txn.isActive())
                 txn.rollback();
         }
     }

@@ -1,6 +1,7 @@
 package pt.unl.fct.di.adc.firstwebapp.data;
 
 import java.security.MessageDigest;
+import java.util.regex.Pattern;
 
 import pt.unl.fct.di.adc.firstwebapp.util.ValidationUtils;
 
@@ -54,15 +55,14 @@ public class UserRequest {
 			return role;
 		}
 
-        // TODO: Should unknown roles lead to INVALID_INPUT?? [NEXT POINT]
         public boolean isValid() {
-            return ValidationUtils.nonEmptyOrBlankField(username) &&
-                ValidationUtils.nonEmptyOrBlankField(password) &&
-                ValidationUtils.nonEmptyOrBlankField(phone) &&
-                ValidationUtils.nonEmptyOrBlankField(address) &&
-                ValidationUtils.nonEmptyOrBlankField(role) &&
-                username.contains("@") &&
-                MessageDigest.isEqual(password.getBytes(), confirmation.getBytes());
+            return ValidationUtils.nonEmptyOrBlankField(username)
+                && ValidationUtils.nonEmptyOrBlankField(password)
+                && ValidationUtils.nonEmptyOrBlankField(phone)
+                && ValidationUtils.nonEmptyOrBlankField(address)
+                && ValidationUtils.nonEmptyOrBlankField(role) && Role.isDefined(role)
+                && ValidationUtils.validEmail(username)
+                && MessageDigest.isEqual(password.getBytes(), confirmation.getBytes());
         }
 
 }

@@ -11,7 +11,7 @@ import pt.unl.fct.di.adc.firstwebapp.util.ValidationUtils;
 
 public class AuthToken {
 
-	public static final long EXPIRATION_TIME = 1000*60*15; // 9h
+	public static final long EXPIRATION_TIME = 1000*60*15; // 15' 
 	
 	private String tokenId;
 	private String username;
@@ -70,7 +70,7 @@ public class AuthToken {
     public boolean isValid() {
         return ValidationUtils.nonEmptyOrBlankField(username)
             && ValidationUtils.nonEmptyOrBlankField(tokenId)
-            && Role.isDefined(role)
+            && ValidationUtils.nonEmptyOrBlankField(role) && Role.isDefined(role)
             && issuedAt != 0L
             && expiresAt != 0L;
     }

@@ -70,7 +70,7 @@ public class ShowUsersResource {
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
 
-            // Role Validation
+            // Role Validation (redundant but safe)
             String roleString = requester.getString(Constants.USER_ROLE);
             if(!Role.isDefined(roleString))
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
@@ -81,7 +81,7 @@ public class ShowUsersResource {
 
             // Query Users
             String kind = KIND_USER;
-            String gqlQuery = "select * from " + kind;
+            String gqlQuery = "SELECT * FROM " + kind;
             Query<Entity> query = Query.newGqlQueryBuilder(Query.ResultType.ENTITY, gqlQuery).build();
             QueryResults<Entity> results = datastore.run(query);
 

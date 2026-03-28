@@ -66,24 +66,28 @@ public class ShowAuthSessionsResource {
             
 
             // Role Validation
+            String roleString = requester.getString(Constants.USER_ROLE);
+            if(!Role.isDefined(roleString))
+                return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
             Role role = Role.valueOf(requester.getString(Constants.USER_ROLE));
             if(role != Role.ADMIN)
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             // Query Tokens
             String kind = Constants.KIND_TOKEN;
-            String gqlQuery = "select * from " + kind;
+            String gqlQuery = "SELECT * FROM " + kind;
             Query<Entity> query = Query.newGqlQueryBuilder(Query.ResultType.ENTITY, gqlQuery).build();
             QueryResults<Entity> results = datastore.run(query);
 
             List<TokenSummary> summary = new ArrayList<>(); 
+
             while( results.hasNext() ) {
                 Entity entity = results.next();
                 String tokenId = entity.getString(Constants.TOKEN_ID);
                 String username = entity.getString(Constants.USER_NAME);
-                String roleString = entity.getString(Constants.USER_ROLE);
+                String tRoleString = entity.getString(Constants.USER_ROLE);
                 long expiresAt = entity.getLong(Constants.EXPIRES_AT) / 1000;
-                summary.add( new TokenSummary(tokenId, username, roleString, expiresAt) );
+                summary.add( new TokenSummary(tokenId, username, tRoleString, expiresAt) );
             }
 
             return new AppResponse <SessionsWrapper>("success", new SessionsWrapper( summary )).toResponse();

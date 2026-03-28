@@ -1,9 +1,23 @@
 package pt.unl.fct.di.adc.firstwebapp.data;
 
 public enum Role {
-    USER, BOFFICER, ADMIN;
+    USER(1), BOFFICER(2), ADMIN(3);
 
-    public static boolean isDefined(String role) {
+    private int degree;
+
+    private Role(int degree) {
+        this.degree = degree;
+    }
+
+    public int getDegree() {
+		return this.degree;
+	}
+
+    public boolean isHigherDegree(Role role) {
+        return this.getDegree() > role.getDegree();
+    }
+
+	public static boolean isDefined(String role) {
         if(role == null) return false;
         for(Role r : Role.values())
             if( role.equals(r.name()))

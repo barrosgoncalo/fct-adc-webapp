@@ -21,7 +21,8 @@ public class ChangeUserRoleRequest {
 
     public boolean isValid() {
         return ValidationUtils.nonEmptyOrBlankField(username)
-            && ValidationUtils.nonEmptyOrBlankField(newRole);
+            && ValidationUtils.nonEmptyOrBlankField(newRole)
+            && Role.isDefined(newRole);
     }
 
 	public String getNewRole() {

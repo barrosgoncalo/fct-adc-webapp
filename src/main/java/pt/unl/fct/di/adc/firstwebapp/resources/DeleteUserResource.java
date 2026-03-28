@@ -62,18 +62,6 @@ public class DeleteUserResource {
 
         try {
 
-            // User verification
-            Entity user;
-            try{ user = UserUtils.validateUser(txn, data.getUsername()); }
-            catch(InvalidInputException e) {
-                // TODO : LOG
-                return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
-            }
-            catch(UserNotFoundException e) {
-                // TODO : LOG
-                return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
-            }
-
             // Token verification
             Entity requester;
             try { requester = AuthUtils.validateToken(txn, request.getToken().getTokenId()); }
@@ -88,6 +76,20 @@ public class DeleteUserResource {
                 // TODO: LOG
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
+
+
+            // User verification
+            Entity user;
+            try{ user = UserUtils.validateUser(txn, data.getUsername()); }
+            catch(InvalidInputException e) {
+                // TODO : LOG
+                return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
+            }
+            catch(UserNotFoundException e) {
+                // TODO : LOG
+                return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
+            }
+
 
             // Verify authorization
             String role = requester.getString(Constants.USER_ROLE);
@@ -126,7 +128,7 @@ public class DeleteUserResource {
 			LOG.severe(e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
 		} finally {
-			if (txn.isActive()) {
+			if (txn != null && txn.isActive()) {
 				txn.rollback();
 			}
 		}
