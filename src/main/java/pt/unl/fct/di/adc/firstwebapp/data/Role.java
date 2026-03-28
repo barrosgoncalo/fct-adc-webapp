@@ -13,8 +13,8 @@ public enum Role {
 		return this.degree;
 	}
 
-    public boolean isHigherDegree(Role role) {
-        return this.getDegree() > role.getDegree();
+    public boolean isHigherOrEqualDegree(Role role) {
+        return this.getDegree() >= role.getDegree();
     }
 
 	public static boolean isDefined(String role) {

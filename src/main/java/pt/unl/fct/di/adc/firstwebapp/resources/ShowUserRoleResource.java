@@ -80,7 +80,7 @@ public class ShowUserRoleResource {
 
             Role userRole = Role.valueOf(user.getString(Constants.USER_ROLE));
 
-            if( !requesterRole.isHigherDegree(userRole) )
+            if( !requesterRole.isHigherOrEqualDegree(userRole) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             UserSummary summary = new UserSummary(

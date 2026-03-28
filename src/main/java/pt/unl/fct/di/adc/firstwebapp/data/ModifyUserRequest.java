@@ -31,6 +31,7 @@ public class ModifyUserRequest {
 
     public static class AttributesData {
 
+        private String username;
         private String phone;
         private String address;
 
@@ -48,6 +49,10 @@ public class ModifyUserRequest {
         public String getAddress() {
             return address;
         }
+
+		public String getUsername() {
+			return username;
+		}
 
     }
 
