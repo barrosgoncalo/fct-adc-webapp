@@ -98,7 +98,7 @@ public class LogoutResource {
             Query<Key> query = Query.newGqlQueryBuilder(Query.ResultType.KEY, gqlQuery)
                                 .setBinding("username", data.getUsername())
                                 .build();
-            QueryResults<Key> results = datastore.run(query);
+            QueryResults<Key> results = txn.run(query);
 
             List<Key> keysToRemove = new ArrayList<>();
 

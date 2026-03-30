@@ -59,7 +59,7 @@ public class CreateUserResource {
 
             if(user != null) {
                 txn.rollback();
-                return new ErrorResponse(Status.CONFLICT, ErrorCode.USER_ALREADY_EXISTS).toResponse();
+                return new ErrorResponse(Status.OK, ErrorCode.USER_ALREADY_EXISTS).toResponse();
             } else {
                 user = Entity.newBuilder(userKey)
                         .set( Constants.USER_NAME, data.getUsername() )
