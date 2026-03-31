@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.google.api.gax.rpc.UnauthenticatedException;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
@@ -28,6 +27,7 @@ import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.ExpiredTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
+import pt.unl.fct.di.adc.firstwebapp.exceptions.UnauthenticTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 import pt.unl.fct.di.adc.firstwebapp.util.AppRequest;
 import pt.unl.fct.di.adc.firstwebapp.util.AppResponse;
@@ -62,7 +62,7 @@ public class LogoutResource {
             // Token validation
             Entity requester;
             try { requester = AuthUtils.validateToken( txn, request.getToken().getTokenId() ); }
-            catch(InvalidInputException | UnauthenticatedException e) {
+            catch(InvalidInputException | UnauthenticTokenException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
             catch(ExpiredTokenException e) {
