@@ -84,11 +84,9 @@ public class ChangeUserRoleResource {
             Entity user;
             try{ user = UserUtils.validateUser( txn, data.getUsername() ); }
             catch(InvalidInputException e) {
-                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
             }
             catch(UserNotFoundException e) {
-                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
@@ -129,7 +127,6 @@ public class ChangeUserRoleResource {
             }
 
             txn.commit();
-            //TODO : LOG
 
             return new AppResponse <MessageWrapper>("success", new MessageWrapper(SUCCESS)).toResponse();
 

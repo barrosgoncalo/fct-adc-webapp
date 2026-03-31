@@ -74,19 +74,15 @@ public class ChangeUserPwdResource {
             Entity user;
             try{ user = UserUtils.validateUser( txn, data.getUsername()); }
             catch(InvalidInputException e) {
-                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
             }
             catch(UserNotFoundException e) {
-                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
             // Role verification (Token role == User role)
-            if( !requester.getString(Constants.USER_NAME).equals(data.getUsername()) ) {
-                // TODO : LOG
+            if( !requester.getString(Constants.USER_NAME).equals(data.getUsername()) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
-            }
 
             // Password Validation
             String providedPwd = DigestUtils.sha512Hex( data.getOldPassword() );
@@ -103,7 +99,6 @@ public class ChangeUserPwdResource {
                     
             txn.put(modUser);
             txn.commit();
-            //TODO : LOG
 
             return new AppResponse <MessageWrapper>("success", new MessageWrapper(SUCCESS)).toResponse();
 

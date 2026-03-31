@@ -43,21 +43,15 @@ import com.google.cloud.datastore.DatastoreOptions;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LoginResource {
 
-	private static final String MESSAGE_INVALID_CREDENTIALS = "Incorrect username or password.";
-	private static final String MESSAGE_NEXT_PARAMETER_INVALID = "Request parameter 'next' must be greater or equal to 0.";
-
-
 	private static final String LOG_MESSAGE_LOGIN_ATTEMP = "Login attempt by user: ";
 	private static final String LOG_MESSAGE_LOGIN_SUCCESSFUL = "Login successful by user: ";
 	private static final String LOG_MESSAGE_WRONG_PASSWORD = "Wrong password for: ";
-	private static final String LOG_MESSAGE_UNKNOW_USER = "Failed login attempt for username: ";
 	
 	/** 
 	 * Logger Object
 	 */
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
-	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
 	private static final KeyFactory tokensKeyFactory = datastore.newKeyFactory().setKind("Token");
 
 	public LoginResource() {} // Nothing to be done here
@@ -75,8 +69,6 @@ public class LoginResource {
 
         if(!data.isValid())
             return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
-
-		Key userKey = userKeyFactory.newKey(data.getUsername());
 
 		Transaction txn = datastore.newTransaction();
 
@@ -106,8 +98,6 @@ public class LoginResource {
 
                 Key tokenKey = tokensKeyFactory.newKey(token.getTokenId());
                 Entity newToken = txn.get(tokenKey);
-
-                // TODO: VERIFY IF THE TOKEN BELONGS TO THE DATABSE
 
                 newToken = Entity.newBuilder(tokenKey)
                     .set( Constants.TOKEN_ID, token.getTokenId() )

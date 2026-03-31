@@ -44,7 +44,6 @@ public class ShowUsersResource {
     
     public ShowUsersResource() {}
 
-    // TODO: not understanding ERROR cases
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -98,8 +97,6 @@ public class ShowUsersResource {
         } catch (Exception e) {
             LOG.severe("Error showing users: " + e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
-        } finally {
-            // TODO
         }
     }
 

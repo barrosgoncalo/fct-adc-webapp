@@ -62,7 +62,7 @@ public class ModifyAccountResource {
 
         Transaction txn = datastore.newTransaction();
 
-        try {
+       try {
 
             // Token Validation
             String tokenId = request.getToken().getTokenId();

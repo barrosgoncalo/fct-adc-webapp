@@ -66,14 +66,12 @@ public class DeleteUserResource {
             Entity requester;
             try { requester = AuthUtils.validateToken(txn, request.getToken().getTokenId()); }
             catch(InvalidInputException | UnauthenticTokenException e) {
-                // TODO: LOG
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
             catch(ExpiredTokenException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.TOKEN_EXPIRED).toResponse();
             }
             catch(UserNotFoundException e) {
-                // TODO: LOG
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
             }
 
@@ -82,21 +80,17 @@ public class DeleteUserResource {
             Entity user;
             try{ user = UserUtils.validateUser(txn, data.getUsername()); }
             catch(InvalidInputException e) {
-                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
             }
             catch(UserNotFoundException e) {
-                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
 
             // Verify authorization
             String role = requester.getString(Constants.USER_ROLE);
-            if(Role.ADMIN != Role.valueOf(role)) {
-                // TODO: LOG
+            if(Role.ADMIN != Role.valueOf(role))
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
-            }
 
             txn.delete(user.getKey());
 

@@ -28,7 +28,6 @@ public class AuthToken {
         this.role = role;
 		this.issuedAt = System.currentTimeMillis();
 		this.expiresAt = this.issuedAt + EXPIRATION_TIME;
-
         this.hash = 
             DigestUtils.sha512Hex(
                     username 
@@ -37,7 +36,7 @@ public class AuthToken {
                     + expiresAt
                     + AuthUtils.computeSessionKey(masterKey, tokenId)
                 );
-}
+    }
 
     // getters
 	public String getTokenId() {

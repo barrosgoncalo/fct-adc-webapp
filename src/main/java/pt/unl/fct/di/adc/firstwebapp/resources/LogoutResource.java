@@ -76,18 +76,16 @@ public class LogoutResource {
             // User Validation
             try{ UserUtils.validateUser( txn, data.getUsername() ); }
             catch(InvalidInputException e) {
-                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
             }
             catch(UserNotFoundException e) {
-                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
             // Role Permissions enforce
             Role role = Role.valueOf(requester.getString(Constants.USER_ROLE));
 
-            if( !(Role.isAdmin(role) || data.getUsername() == requester.getString(Constants.USER_NAME)) )
+            if( !(Role.isAdmin(role) || data.getUsername().equals(requester.getString(Constants.USER_NAME))) )
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             // Query Tokens
@@ -98,7 +96,7 @@ public class LogoutResource {
             Query<Key> query = Query.newGqlQueryBuilder(Query.ResultType.KEY, gqlQuery)
                                 .setBinding("username", data.getUsername())
                                 .build();
-            QueryResults<Key> results = txn.run(query);
+            QueryResults<Key> results = datastore.run(query);
 
             List<Key> keysToRemove = new ArrayList<>();
 

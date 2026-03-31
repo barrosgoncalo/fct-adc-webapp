@@ -17,11 +17,11 @@ public class ValidationUtils {
         private static final String DOMAIN_SPECIAL = "(\\.[A-Za-z0-9-]+)*";
         private static final String COMMON_DOMAIN_PATTERN = DOMAIN_REGULAR + PLUS + DOMAIN_SPECIAL;
 
-        private static final String INITAL_FORBIDEN = "[^-]";
+        private static final String INITAL_FORBBIDEN = "[^-]";
         private static final String TLD_PATTERN = "(\\.[A-Za-z]{2,})";
 
         private static final String REGEX_PATTERN =
-            SETUP_CHECK + COMMON_LOCAL_PATTERN + AT + INITAL_FORBIDEN + COMMON_DOMAIN_PATTERN + TLD_PATTERN + END_OF_STRING;
+            SETUP_CHECK + COMMON_LOCAL_PATTERN + AT + INITAL_FORBBIDEN + COMMON_DOMAIN_PATTERN + TLD_PATTERN + END_OF_STRING;
 
     public static boolean validEmail(String email) {
         return Pattern.compile(REGEX_PATTERN)

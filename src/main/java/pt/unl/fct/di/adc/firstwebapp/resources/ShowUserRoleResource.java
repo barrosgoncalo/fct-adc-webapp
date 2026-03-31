@@ -70,11 +70,9 @@ public class ShowUserRoleResource {
             Entity user;
             try{ user = UserUtils.validateUser( data.getUsername()); }
             catch(InvalidInputException e) {
-                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
             }
             catch(UserNotFoundException e) {
-                // TODO : LOG
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
