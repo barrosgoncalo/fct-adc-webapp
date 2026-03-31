@@ -19,7 +19,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import pt.unl.fct.di.adc.firstwebapp.data.ChangeUserPwdRequest;
 import pt.unl.fct.di.adc.firstwebapp.data.MessageWrapper;
-import pt.unl.fct.di.adc.firstwebapp.data.Role;
 import pt.unl.fct.di.adc.firstwebapp.data.Constants;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorCode;
 import pt.unl.fct.di.adc.firstwebapp.error.ErrorResponse;
