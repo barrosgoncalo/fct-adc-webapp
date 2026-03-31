@@ -12,7 +12,9 @@ public enum Role {
     public int getDegree() {
 		return this.degree;
 	}
-
+    public boolean isHigherDegree(Role role) {
+        return this.getDegree() > role.getDegree();
+    }
     public boolean isHigherOrEqualDegree(Role role) {
         return this.getDegree() >= role.getDegree();
     }

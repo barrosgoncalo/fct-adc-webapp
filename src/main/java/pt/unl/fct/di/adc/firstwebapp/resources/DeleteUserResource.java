@@ -100,7 +100,6 @@ public class DeleteUserResource {
 
             txn.delete(user.getKey());
 
-            // TODO : FURTHER TEST TOKEN REMOVAL UPPON ACCOUNT DELETION
             // Query Tokens
             String gqlQuery = 
                 "SELECT __key__ FROM " + Constants.KIND_TOKEN + 
@@ -109,7 +108,7 @@ public class DeleteUserResource {
             Query<Key> query = Query.newGqlQueryBuilder(Query.ResultType.KEY, gqlQuery)
                                 .setBinding("username", data.getUsername())
                                 .build();
-            QueryResults<Key> results = txn.run(query);
+            QueryResults<Key> results = datastore.run(query);
 
             List<Key> keysToRemove = new ArrayList<>();
 
@@ -132,6 +131,5 @@ public class DeleteUserResource {
 				txn.rollback();
 			}
 		}
-
     }
 }

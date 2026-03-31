@@ -54,6 +54,12 @@ public class ModifyAccountResource {
         if(!data.isValid())
             return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
+            // username field rejection
+            AttributesData attributes = data.getAttributes();
+
+            if(attributes.getUsername() != null)
+                return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
+
         Transaction txn = datastore.newTransaction();
 
         try {
@@ -77,13 +83,12 @@ public class ModifyAccountResource {
             String roleString = requester.getString(Constants.USER_ROLE);
             if(!Role.isDefined(roleString))
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
-
-            Role role = Role.valueOf(roleString);
+            Role requesterRole = Role.valueOf(roleString);
 
             // User Validation
             String username = data.getUsername();
-            Entity user;
-            try { user = UserUtils.validateUser(txn, username); }
+            Entity user2mod;
+            try { user2mod = UserUtils.validateUser(txn, username); }
             catch(InvalidInputException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
             }
@@ -91,18 +96,25 @@ public class ModifyAccountResource {
                 return new ErrorResponse(Status.OK, ErrorCode.USER_NOT_FOUND).toResponse();
             }
 
+            Role user2modRole = Role.valueOf(user2mod.getString(Constants.USER_ROLE));
+
             // Role permissions enforce
-            if( !(Role.isAdmin(role) || username.equals(requester.getString(Constants.USER_NAME))) )
-                return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
+            boolean isHigherDegree = requesterRole.isHigherDegree(user2modRole);
+            boolean isSameUser = username.equals(requester.getString(Constants.USER_NAME));
+            if( !( isHigherDegree ||  isSameUser ) ) {
+                if( !requesterRole.isHigherOrEqualDegree(user2modRole) )
+                    return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
+                else if( !isSameUser )
+                    return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
+            }
 
-            AttributesData attributes = data.getAttributes();
 
-            if(attributes.getUsername() != null)
-                return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
+            String phone = attributes.getPhone().isBlank() ? user2mod.getString(Constants.USER_PHONE) : attributes.getPhone();
+            String addr = attributes.getAddress().isBlank() ? user2mod.getString(Constants.USER_ADDRESS) : attributes.getAddress();
 
-            Entity modUser = Entity.newBuilder(user)
-                    .set(Constants.USER_PHONE, attributes.getPhone())
-                    .set(Constants.USER_ADDRESS, attributes.getAddress())
+            Entity modUser = Entity.newBuilder(user2mod)
+                    .set(Constants.USER_PHONE, phone)
+                    .set(Constants.USER_ADDRESS, addr)
                     .build();
 
             txn.put(modUser);

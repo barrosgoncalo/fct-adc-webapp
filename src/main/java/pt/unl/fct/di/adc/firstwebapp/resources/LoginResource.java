@@ -127,7 +127,7 @@ public class LoginResource {
 			} else {
 				// Incorrect password
 				LOG.warning(LOG_MESSAGE_WRONG_PASSWORD + data.getUsername());
-				return new ErrorResponse(Status.FORBIDDEN, ErrorCode.INVALID_CREDENTIALS).toResponse();
+				return new ErrorResponse(Status.OK, ErrorCode.INVALID_CREDENTIALS).toResponse();
 			}
 		} catch (Exception e) {
 			txn.rollback();

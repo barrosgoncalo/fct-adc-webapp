@@ -106,7 +106,7 @@ public class ChangeUserRoleResource {
             Query<Entity> query = Query.newGqlQueryBuilder(Query.ResultType.ENTITY, gqlQuery)
                                 .setBinding("username", data.getUsername())
                                 .build();
-            QueryResults<Entity> results = txn.run(query);
+            QueryResults<Entity> results = datastore.run(query);
             
             txn.put(modUser);
 
