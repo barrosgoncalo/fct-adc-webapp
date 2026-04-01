@@ -52,13 +52,13 @@ public class ChangeUserPwdResource {
         if(!data.isValid())
             return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = null;
 
         try { 
 
             // Token Validation
             Entity requester;
-            try { requester = AuthUtils.validateToken(txn, request.getToken().getTokenId()); }
+            try { requester = AuthUtils.validateToken(request.getToken().getTokenId()); }
             catch(InvalidInputException | UnauthenticTokenException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
@@ -71,7 +71,7 @@ public class ChangeUserPwdResource {
 
             // User Validation
             Entity user;
-            try{ user = UserUtils.validateUser( txn, data.getUsername()); }
+            try{ user = UserUtils.validateUser(data.getUsername()); }
             catch(InvalidInputException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
             }
@@ -95,7 +95,9 @@ public class ChangeUserPwdResource {
             Entity modUser = Entity.newBuilder(user)
                     .set(Constants.USER_PWD, newPwd)
                     .build();
-                    
+
+            // initialize transaction
+            txn = datastore.newTransaction();
             txn.put(modUser);
             txn.commit();
 

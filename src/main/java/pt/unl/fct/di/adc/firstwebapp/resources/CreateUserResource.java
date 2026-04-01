@@ -50,6 +50,7 @@ public class CreateUserResource {
         if( !data.isValid() )
             return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
+        // initialize transaction
         Transaction txn = datastore.newTransaction();
 
         try {

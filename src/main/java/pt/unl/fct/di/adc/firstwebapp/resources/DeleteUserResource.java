@@ -58,13 +58,13 @@ public class DeleteUserResource {
             return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
 
 
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = null;
 
         try {
 
             // Token verification
             Entity requester;
-            try { requester = AuthUtils.validateToken(txn, request.getToken().getTokenId()); }
+            try { requester = AuthUtils.validateToken(request.getToken().getTokenId()); }
             catch(InvalidInputException | UnauthenticTokenException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
@@ -78,7 +78,7 @@ public class DeleteUserResource {
 
             // User verification
             Entity user;
-            try{ user = UserUtils.validateUser(txn, data.getUsername()); }
+            try{ user = UserUtils.validateUser(data.getUsername()); }
             catch(InvalidInputException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
             }
@@ -92,6 +92,8 @@ public class DeleteUserResource {
             if(Role.ADMIN != Role.valueOf(role))
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
+            // initialize transaction
+            txn = datastore.newTransaction();  
             txn.delete(user.getKey());
 
             // Query Tokens

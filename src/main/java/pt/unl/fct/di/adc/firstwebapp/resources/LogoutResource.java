@@ -55,13 +55,13 @@ public class LogoutResource {
         if(!data.isValid())
             return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = null;
 
         try { 
 
             // Token validation
             Entity requester;
-            try { requester = AuthUtils.validateToken( txn, request.getToken().getTokenId() ); }
+            try { requester = AuthUtils.validateToken(request.getToken().getTokenId() ); }
             catch(InvalidInputException | UnauthenticTokenException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
@@ -74,7 +74,7 @@ public class LogoutResource {
 
 
             // User Validation
-            try{ UserUtils.validateUser( txn, data.getUsername() ); }
+            try{ UserUtils.validateUser(data.getUsername() ); }
             catch(InvalidInputException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
             }
@@ -102,7 +102,8 @@ public class LogoutResource {
 
             // Creation of array list of Keys, through iteration over the iterable results
             results.forEachRemaining(keysToRemove::add);
-            
+
+            txn = datastore.newTransaction();
 
             if(!keysToRemove.isEmpty())
                 txn.delete( keysToRemove.toArray( new Key[0]) );
@@ -115,7 +116,7 @@ public class LogoutResource {
             LOG.severe("Error lougout user: " + e.getMessage());
             return new ErrorResponse(Status.INTERNAL_SERVER_ERROR, ErrorCode.FORBIDDEN).toResponse();
         } finally {
-            if(txn.isActive())
+            if(txn != null && txn.isActive())
                 txn.rollback();
         }
 

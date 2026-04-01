@@ -58,14 +58,13 @@ public class ChangeUserRoleResource {
         if(!data.isValid())
             return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
-        // transaction initialization
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = null;
 
         try { 
 
             // Token validation
             Entity requester;
-            try { requester = AuthUtils.validateToken( txn, request.getToken().getTokenId() ); }
+            try { requester = AuthUtils.validateToken( request.getToken().getTokenId() ); }
             catch(InvalidInputException | UnauthenticTokenException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
@@ -82,7 +81,7 @@ public class ChangeUserRoleResource {
                 return new ErrorResponse(Status.OK, ErrorCode.UNAUTHORIZED).toResponse();
 
             Entity user;
-            try{ user = UserUtils.validateUser( txn, data.getUsername() ); }
+            try{ user = UserUtils.validateUser( data.getUsername() ); }
             catch(InvalidInputException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.FORBIDDEN).toResponse();
             }
@@ -106,6 +105,9 @@ public class ChangeUserRoleResource {
                                 .build();
             QueryResults<Entity> results = datastore.run(query);
             
+            // transaction initialization
+            txn = datastore.newTransaction();
+
             txn.put(modUser);
 
             // Creation of array list of Keys, through iteration over the iterable results

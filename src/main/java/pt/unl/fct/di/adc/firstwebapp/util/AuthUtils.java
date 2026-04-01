@@ -55,6 +55,7 @@ public class AuthUtils {
             throw new UnauthenticTokenException();
 
         if(System.currentTimeMillis() > token.getLong(EXPIRES_AT)) {
+            // TODO: LOG 
             throw new ExpiredTokenException();
         }
 

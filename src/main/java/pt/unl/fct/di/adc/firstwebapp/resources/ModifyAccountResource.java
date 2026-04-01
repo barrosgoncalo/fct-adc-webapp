@@ -60,7 +60,7 @@ public class ModifyAccountResource {
             if(attributes.getUsername() != null)
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = null;
 
        try {
 
@@ -68,7 +68,7 @@ public class ModifyAccountResource {
             String tokenId = request.getToken().getTokenId();
 
             Entity requester;
-            try { requester = AuthUtils.validateToken(txn, tokenId); }
+            try { requester = AuthUtils.validateToken(tokenId); }
             catch(InvalidInputException | UnauthenticTokenException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_TOKEN).toResponse();
             }
@@ -88,7 +88,7 @@ public class ModifyAccountResource {
             // User Validation
             String username = data.getUsername();
             Entity user2mod;
-            try { user2mod = UserUtils.validateUser(txn, username); }
+            try { user2mod = UserUtils.validateUser(username); }
             catch(InvalidInputException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
             }
@@ -117,6 +117,7 @@ public class ModifyAccountResource {
                     .set(Constants.USER_ADDRESS, addr)
                     .build();
 
+            txn = datastore.newTransaction();
             txn.put(modUser);
             txn.commit();
 

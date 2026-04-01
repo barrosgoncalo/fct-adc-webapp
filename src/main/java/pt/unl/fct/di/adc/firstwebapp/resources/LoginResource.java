@@ -70,12 +70,12 @@ public class LoginResource {
         if(!data.isValid())
             return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
 
-		Transaction txn = datastore.newTransaction();
+        Transaction txn = null;
 
 		try {
 
             Entity user;
-            try{ user = UserUtils.validateUser(txn, data.getUsername()); }
+            try{ user = UserUtils.validateUser(data.getUsername()); }
             catch(InvalidInputException e) {
                 return new ErrorResponse(Status.OK, ErrorCode.INVALID_CREDENTIALS).toResponse();
             }
@@ -97,7 +97,7 @@ public class LoginResource {
                 LOG.info(LOG_MESSAGE_LOGIN_SUCCESSFUL + data.getUsername());
 
                 Key tokenKey = tokensKeyFactory.newKey(token.getTokenId());
-                Entity newToken = txn.get(tokenKey);
+                Entity newToken = datastore.get(tokenKey);
 
                 newToken = Entity.newBuilder(tokenKey)
                     .set( Constants.TOKEN_ID, token.getTokenId() )
@@ -109,6 +109,7 @@ public class LoginResource {
                     .build();
 
                 // Batch operation
+                txn = datastore.newTransaction();
                 txn.put(newToken);
                 txn.commit();
                 LOG.info("Session started for user " + data.getUsername() + " with token " + token.getTokenId());
