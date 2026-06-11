@@ -1,1 +1,15 @@
-.DS_STORE
+# Maven
+target/
+
+# Eclipse
+.settings/
+.classpath
+.factorypath
+.project
+
+# macOS
+.DS_Store
+
+# Local env
+.zshrc
+.env
