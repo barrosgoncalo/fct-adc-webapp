@@ -3,6 +3,10 @@ package pt.unl.fct.di.adc.firstwebapp.data;
 
 public final class Constants {
 
+    //Responses
+    public static final String SUCCESS = "success";
+
+
     // Security
     public static final String HASH = "hash";
 

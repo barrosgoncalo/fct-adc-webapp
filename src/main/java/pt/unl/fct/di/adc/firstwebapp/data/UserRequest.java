@@ -1,67 +1,24 @@
 package pt.unl.fct.di.adc.firstwebapp.data;
 
 import java.security.MessageDigest;
-import java.util.regex.Pattern;
 
-import pt.unl.fct.di.adc.firstwebapp.util.ValidationUtils;
+import static pt.unl.fct.di.adc.firstwebapp.util.ValidationUtils.*;
 
-public class UserRequest {
-
-        private String username;
-        private String password;
-        private String confirmation;
-        private String phone;
-        private String address;
-        private String role;
-
-        public UserRequest() {}
-
-
-        public UserRequest(String username, String password, String confirmation, String phone, String address, String role) {
-            this.username = username;
-            this.password = password;
-            this.confirmation = confirmation;
-            this.phone = phone;
-            this.address = address;
-            this.role = role;
-        }
-
-        // getters
-		public String getUsername() {
-			return username;
-		}
-
-
-		public String getPassword() {
-			return password;
-		}
-
-
-		public String getConfirmation() {
-			return confirmation;
-		}
-
-		public String getPhone() {
-			return phone;
-		}
-
-
-		public String getAddress() {
-			return address;
-		}
-
-
-		public String getRole() {
-			return role;
-		}
-
+public record UserRequest(
+        String username,
+        String password,
+        String confirmation,
+        String phone,
+        String address,
+        String role 
+) {
         public boolean isValid() {
-            return ValidationUtils.nonEmptyOrBlankField(username)
-                && ValidationUtils.nonEmptyOrBlankField(password)
-                && ValidationUtils.nonEmptyOrBlankField(phone)
-                && ValidationUtils.nonEmptyOrBlankField(address)
-                && ValidationUtils.nonEmptyOrBlankField(role) && Role.isDefined(role)
-                && ValidationUtils.validEmail(username)
+            return nonEmptyOrBlankField(username)
+                && nonEmptyOrBlankField(password)
+                && nonEmptyOrBlankField(phone)
+                && nonEmptyOrBlankField(address)
+                && nonEmptyOrBlankField(role) && Role.isDefined(role)
+                && validEmail(username)
                 && MessageDigest.isEqual(password.getBytes(), confirmation.getBytes());
         }
 

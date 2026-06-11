@@ -39,7 +39,7 @@ public class ShowUsersResource {
 
     private static final String KIND_USER = "User";
 
-    private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
+    private static final Logger LOG = Logger.getLogger(ShowUsersResource.class.getName());
     private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
     
     public ShowUsersResource() {}

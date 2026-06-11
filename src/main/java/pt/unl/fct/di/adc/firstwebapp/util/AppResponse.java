@@ -24,6 +24,9 @@ public class AppResponse<T> {
 		return data;
 	}
 
+    public static <T> Response buildSuccess(String status, T data) {
+        return new AppResponse<>(status, data).toResponse();
+    }
 
 
 }

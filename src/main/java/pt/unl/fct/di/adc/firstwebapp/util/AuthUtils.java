@@ -18,12 +18,13 @@ import pt.unl.fct.di.adc.firstwebapp.exceptions.UnauthenticTokenException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 import pt.unl.fct.di.adc.firstwebapp.security.SecurityConfig;
 
+import static pt.unl.fct.di.adc.firstwebapp.data.Constants.KIND_USER;
+import static pt.unl.fct.di.adc.firstwebapp.data.Constants.KIND_TOKEN;
+
 public class AuthUtils {
 
     private static final String PROPERTY_USERNAME = "username";
     private static final String EXPIRES_AT = "expiresAt";
-    private static final String KIND_TOKEN = "Token";
-    private static final String KIND_USER = "User";
 
 	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 

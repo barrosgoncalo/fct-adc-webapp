@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.firstwebapp.resources;
+package pt.unl.fct.di.adc.firstwebapp.resources.toDeleteAccount;
 
 import java.util.logging.Logger;
 
@@ -45,7 +45,7 @@ public class CreateUserResource {
 
         UserRequest data = request.getInput();
 
-        LOG.fine("Attempt to create account: " + data.getUsername());
+        LOG.fine("Attempt to create account: " + data.username());
 
         if( !data.isValid() )
             return new ErrorResponse(Status.OK, ErrorCode.INVALID_INPUT).toResponse();
@@ -55,7 +55,7 @@ public class CreateUserResource {
 
         try {
 
-            Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.getUsername());
+            Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username());
             Entity user = txn.get(userKey);
 
             if(user != null) {

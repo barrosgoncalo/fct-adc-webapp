@@ -12,9 +12,9 @@ import com.google.cloud.datastore.KeyFactory;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.InvalidInputException;
 import pt.unl.fct.di.adc.firstwebapp.exceptions.UserNotFoundException;
 
-public class UserUtils {
+import static pt.unl.fct.di.adc.firstwebapp.data.Constants.KIND_USER;
 
-    private static final String KIND_USER = "User";
+public class UserUtils {
 
 	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 

@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.firstwebapp.resources;
+package pt.unl.fct.di.adc.firstwebapp.resources.toDeleteAuth;
 
 import java.security.MessageDigest;
 import java.util.Objects;
